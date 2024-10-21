@@ -24,7 +24,7 @@ public class MiembroController {
     }
 
     @PostMapping
-    public Miembro saveMiembro(Miembro miembro){
+    public Miembro saveMiembro(@RequestBody Miembro miembro){
         return miembroService.save(miembro);
     }
 
