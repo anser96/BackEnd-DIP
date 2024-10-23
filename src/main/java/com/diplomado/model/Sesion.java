@@ -1,9 +1,9 @@
 package com.diplomado.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
-import java.sql.Time;
+import jakarta.persistence.*;
 import java.util.Date;
+import java.sql.Time;
 import java.util.List;
 
 @Data
@@ -20,13 +20,18 @@ public class Sesion {
     private Time horaFinal;
     private String presidente;
     private String secretario;
+    private String contenido;
 
-    @OneToMany(mappedBy = "sesion")
-    private List<Acta> actas;
-
-    @OneToMany(mappedBy = "sesion")
+    // Relación con asistencia de invitados
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
     private List<AsistenciaInvitado> asistenciaInvitados;
 
-    @OneToMany(mappedBy = "sesion")
+    // Relación con asistencia de miembros
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
     private List<AsistenciaMiembro> asistenciaMiembros;
+
+    // Relación con actas
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    private List<Acta> actas;
 }
+
