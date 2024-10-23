@@ -1,4 +1,4 @@
-package com.diplomado.model;
+package com.diplomado.model.dto;
 
 import lombok.Data;
 

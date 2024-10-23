@@ -1,7 +1,7 @@
 package com.diplomado.controller;
 
 import com.diplomado.model.Solicitud;
-import com.diplomado.model.SolicitudDTO;
+import com.diplomado.model.dto.SolicitudDTO;
 import com.diplomado.service.SolicitudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

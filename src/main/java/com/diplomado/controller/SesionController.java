@@ -3,7 +3,7 @@ package com.diplomado.controller;
 import com.diplomado.model.Invitado;
 import com.diplomado.model.Miembro;
 import com.diplomado.model.Sesion;
-import com.diplomado.model.SesionDTO;
+import com.diplomado.model.dto.SesionDTO;
 import com.diplomado.service.SesionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
