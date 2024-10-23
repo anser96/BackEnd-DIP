@@ -9,6 +9,10 @@ import com.diplomado.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,10 +52,12 @@ public class SesionService {
     }
 
     public SesionDTO convertToDTO(Sesion sesion) {
-        SesionDTO dto = new SesionDTO();
+        SesionDTO dto = SesionDTO.builder().build();
         dto.setIdSesion(sesion.getIdSesion());
         dto.setLugar(sesion.getLugar());
         dto.setFecha(sesion.getFecha());
+        dto.setHoraInicio(sesion.getHoraInicio());
+        dto.setHoraFinal(sesion.getHoraFinal());
         dto.setContenido(sesion.getContenido());
 
         // Obtenemos la asistencia de miembros
@@ -154,6 +160,14 @@ public class SesionService {
     public Sesion definirContenido(int sesionId, String contenido) {
         Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
         sesion.setContenido(contenido);  // Actualiza solo el campo "contenido"
+        return sesionRepository.save(sesion);
+    }
+
+    public Sesion definirFechas(int sesionId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+        sesion.setFecha(fecha);
+        sesion.setHoraInicio(horaInicio);
+        sesion.setHoraFinal(horaFin);
         return sesionRepository.save(sesion);
     }
 

@@ -2,6 +2,9 @@ package com.diplomado.model;
 
 import lombok.Data;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -15,8 +18,10 @@ public class Sesion {
     private int idSesion;
 
     private String lugar;
-    private Date fecha;
+    private LocalDate fecha;
     private String contenido; // El contenido que defines en el método
+    private LocalTime horaInicio; // Campo para la hora de inicio
+    private LocalTime horaFinal; // Campo para la hora de fin
 
     @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
     @JsonManagedReference // Para romper ciclos de serialización
