@@ -11,8 +11,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class Acta {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int numActas;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Esto asegura que el ID sea generado automáticamente
+    @Column(name = "ID_ACTA")  // Mapea a la columna correcta en la base de datos
+    private int idActa;
 
     private String estado;
 

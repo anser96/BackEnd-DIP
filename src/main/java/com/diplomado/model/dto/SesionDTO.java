@@ -3,6 +3,7 @@ package com.diplomado.model.dto;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class SesionDTO {
@@ -11,14 +12,11 @@ public class SesionDTO {
     private Date fecha;
     private String contenido;
 
-    // Constructor
-    public SesionDTO(int idSesion, String lugar, Date fecha, String contenido) {
-        this.idSesion = idSesion;
-        this.lugar = lugar;
-        this.fecha = fecha;
-        this.contenido = contenido;
-    }
+    // Listas de asistencia de miembros e invitados
+    private List<AsistenciaMiembroDTO> asistenciaMiembros;
+    private List<AsistenciaInvitadoDTO> asistenciaInvitados;
 
-    // Getters y Setters (puedes generar con Lombok si prefieres)
+    // Lista de actas relacionadas a la sesión
+    private List<ActaDTO> actas;
 }
 

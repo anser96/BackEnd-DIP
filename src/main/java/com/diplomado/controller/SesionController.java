@@ -36,15 +36,21 @@ public class SesionController {
     @PostMapping("/{sesionId}/definir-contenido")
     public SesionDTO definirContenido(@PathVariable int sesionId, @RequestBody Map<String, String> requestBody) {
         String contenido = requestBody.get("contenido");
+
+        // Actualizar el contenido de la sesión
         Sesion sesion = sesionService.definirContenido(sesionId, contenido);
-        return new SesionDTO(sesion.getIdSesion(), sesion.getLugar(), sesion.getFecha(), sesion.getContenido());
+
+        // Convertir la entidad Sesion en DTO con todos los datos asociados
+        return sesionService.convertToDTO(sesion);
     }
 
     @GetMapping
     public List<SesionDTO> getSesiones() {
         List<Sesion> sesiones = sesionService.findAll();
+
+        // Convertir cada Sesion en un SesionDTO con toda la información relacionada
         return sesiones.stream()
-                .map(s -> new SesionDTO(s.getIdSesion(), s.getLugar(), s.getFecha(), s.getContenido()))
+                .map(sesion -> sesionService.convertToDTO(sesion))
                 .collect(Collectors.toList());
     }
 }

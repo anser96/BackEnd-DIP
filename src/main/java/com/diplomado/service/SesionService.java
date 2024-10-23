@@ -1,10 +1,16 @@
 package com.diplomado.service;
 
 import com.diplomado.model.*;
+import com.diplomado.model.dto.ActaDTO;
+import com.diplomado.model.dto.AsistenciaInvitadoDTO;
+import com.diplomado.model.dto.AsistenciaMiembroDTO;
+import com.diplomado.model.dto.SesionDTO;
 import com.diplomado.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SesionService {
@@ -24,6 +30,9 @@ public class SesionService {
     @Autowired
     private AsistenciaMiembroRepository asistenciaMiembroRepository;
 
+    @Autowired
+    private ActaRepository actaRepository;
+
     public Sesion save(Sesion sesion) {
         return sesionRepository.save(sesion);
     }
@@ -31,6 +40,63 @@ public class SesionService {
     public Sesion findById(int idSesion) {
         return sesionRepository.findById(idSesion).orElseThrow();
     }
+
+    public List<SesionDTO> getSesiones() {
+        List<Sesion> sesiones = sesionRepository.findAll();
+
+        return sesiones.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public SesionDTO convertToDTO(Sesion sesion) {
+        SesionDTO dto = new SesionDTO();
+        dto.setIdSesion(sesion.getIdSesion());
+        dto.setLugar(sesion.getLugar());
+        dto.setFecha(sesion.getFecha());
+        dto.setContenido(sesion.getContenido());
+
+        // Obtenemos la asistencia de miembros
+        List<AsistenciaMiembroDTO> asistenciaMiembros = asistenciaMiembroRepository.findBySesion(sesion)
+                .stream()
+                .map(am -> {
+                    AsistenciaMiembroDTO amDTO = new AsistenciaMiembroDTO();
+                    amDTO.setIdMiembro(am.getMiembro().getIdMiembro());
+                    amDTO.setNombre(am.getMiembro().getNombre());
+                    amDTO.setCargo(am.getMiembro().getCargo());
+                    amDTO.setEstadoAsistencia(am.getEstadoAsistencia());
+                    return amDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setAsistenciaMiembros(asistenciaMiembros);
+
+        // Obtenemos la asistencia de invitados
+        List<AsistenciaInvitadoDTO> asistenciaInvitados = asistenciaInvitadoRepository.findBySesion(sesion)
+                .stream()
+                .map(ai -> {
+                    AsistenciaInvitadoDTO aiDTO = new AsistenciaInvitadoDTO();
+                    aiDTO.setIdInvitado(ai.getInvitado().getIdInvitados());
+                    aiDTO.setNombre(ai.getInvitado().getNombre());
+                    aiDTO.setCargo(ai.getInvitado().getCargo());
+                    aiDTO.setEstadoAsistencia(ai.getEstadoAsistencia());
+                    return aiDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setAsistenciaInvitados(asistenciaInvitados);
+
+        // Obtenemos las actas relacionadas con la sesión
+        List<ActaDTO> actas = actaRepository.findBySesion(sesion)
+                .stream()
+                .map(acta -> {
+                    ActaDTO actaDTO = new ActaDTO();
+                    actaDTO.setIdActa(acta.getIdActa());
+                    actaDTO.setEstado(acta.getEstado());
+                    return actaDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setActas(actas);
+
+        return dto;
+    }
+
 
     public List<Sesion> findAll() {
         return sesionRepository.findAll();
@@ -58,23 +124,27 @@ public class SesionService {
     }
 
 
+    @Transactional
     public void citarMiembros(int sesionId, List<Miembro> miembros) {
-        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
+        // Buscamos la sesión, si no se encuentra lanzamos una excepción
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
 
         for (Miembro miembro : miembros) {
+            // Verificamos si el miembro ya existe en la BD, si no existe lo creamos
             Miembro existingMiembro = miembroRepository.findById(miembro.getIdMiembro()).orElse(miembro);
-            miembroRepository.save(existingMiembro);
+            miembroRepository.save(existingMiembro);  // Guardamos el miembro en caso de que no exista
 
-            // Crea la clave compuesta
+            // Creamos la clave compuesta (sesionId, miembroId)
             AsistenciaMiembroId asistenciaMiembroId = new AsistenciaMiembroId(sesionId, existingMiembro.getIdMiembro());
 
-            // Crea la relación de asistencia
+            // Creamos la relación de asistencia
             AsistenciaMiembro asistenciaMiembro = new AsistenciaMiembro();
             asistenciaMiembro.setId(asistenciaMiembroId);
             asistenciaMiembro.setSesion(sesion);
             asistenciaMiembro.setMiembro(existingMiembro);
-            asistenciaMiembro.setEstadoAsistencia("PENDIENTE");
+            asistenciaMiembro.setEstadoAsistencia("PENDIENTE");  // Inicializamos con "PENDIENTE"
 
+            // Guardamos la relación de asistencia
             asistenciaMiembroRepository.save(asistenciaMiembro);
         }
     }
