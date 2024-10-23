@@ -1,5 +1,4 @@
 package com.diplomado.model;
-
 import lombok.Data;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
@@ -9,8 +8,8 @@ import java.util.Objects;
 @Embeddable
 public class AsistenciaInvitadoId implements Serializable {
 
-    private int sesionId; // Corresponde a SESION_IDSESION
-    private int invitadoId; // Corresponde a INVITADO_IDINVITADO
+    private int sesionId;
+    private int invitadoId;
 
     // Constructor vacío para JPA
     public AsistenciaInvitadoId() {}

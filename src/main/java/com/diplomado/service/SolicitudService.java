@@ -29,5 +29,9 @@ public class SolicitudService {
         solicitud.setRespuesta(respuesta);
         return solicitudRepository.save(solicitud);
     }
+
+    public List<Solicitud> findByEstado(String estado) {
+        return solicitudRepository.findByEstado(estado);
+    }
 }
 

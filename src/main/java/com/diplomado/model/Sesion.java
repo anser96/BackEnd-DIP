@@ -3,8 +3,8 @@ package com.diplomado.model;
 import lombok.Data;
 import jakarta.persistence.*;
 import java.util.Date;
-import java.sql.Time;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Data
 @Entity
@@ -16,22 +16,18 @@ public class Sesion {
 
     private String lugar;
     private Date fecha;
-    private Time horaInicio;
-    private Time horaFinal;
-    private String presidente;
-    private String secretario;
-    private String contenido;
+    private String contenido; // El contenido que defines en el método
 
-    // Relación con asistencia de invitados
     @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
-    private List<AsistenciaInvitado> asistenciaInvitados;
-
-    // Relación con asistencia de miembros
-    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    @JsonManagedReference // Para romper ciclos de serialización
     private List<AsistenciaMiembro> asistenciaMiembros;
 
-    // Relación con actas
     @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    @JsonManagedReference // Para romper ciclos de serialización
+    private List<AsistenciaInvitado> asistenciaInvitados;
+
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    @JsonManagedReference // Para romper ciclos de serialización con Acta
     private List<Acta> actas;
 }
 

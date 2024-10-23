@@ -3,10 +3,13 @@ package com.diplomado.controller;
 import com.diplomado.model.Invitado;
 import com.diplomado.model.Miembro;
 import com.diplomado.model.Sesion;
+import com.diplomado.model.SesionDTO;
 import com.diplomado.service.SesionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sesiones")
@@ -31,13 +34,18 @@ public class SesionController {
     }
 
     @PostMapping("/{sesionId}/definir-contenido")
-    public Sesion definirContenido(@PathVariable int sesionId, @RequestBody String contenido) {
-        return sesionService.definirContenido(sesionId, contenido);
+    public SesionDTO definirContenido(@PathVariable int sesionId, @RequestBody Map<String, String> requestBody) {
+        String contenido = requestBody.get("contenido");
+        Sesion sesion = sesionService.definirContenido(sesionId, contenido);
+        return new SesionDTO(sesion.getIdSesion(), sesion.getLugar(), sesion.getFecha(), sesion.getContenido());
     }
 
     @GetMapping
-    public List<Sesion> getAllSesiones() {
-        return sesionService.findAll();
+    public List<SesionDTO> getSesiones() {
+        List<Sesion> sesiones = sesionService.findAll();
+        return sesiones.stream()
+                .map(s -> new SesionDTO(s.getIdSesion(), s.getLugar(), s.getFecha(), s.getContenido()))
+                .collect(Collectors.toList());
     }
 }
 

@@ -9,19 +9,16 @@ import java.util.Objects;
 @Embeddable
 public class AsistenciaMiembroId implements Serializable {
 
-    private int sesionId; // Corresponde a SESION_IDSESION
-    private int miembroId; // Corresponde a MIEMBROS_IDMIEMBRO
+    private int sesionId;
+    private int miembroId;
 
-    // Constructor vacío para JPA
     public AsistenciaMiembroId() {}
 
-    // Constructor con parámetros
     public AsistenciaMiembroId(int sesionId, int miembroId) {
         this.sesionId = sesionId;
         this.miembroId = miembroId;
     }
 
-    // Sobrescribir equals() y hashCode()
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,4 +32,5 @@ public class AsistenciaMiembroId implements Serializable {
         return Objects.hash(sesionId, miembroId);
     }
 }
+
 

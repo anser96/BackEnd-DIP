@@ -1,10 +1,12 @@
 package com.diplomado.controller;
 
 import com.diplomado.model.Solicitud;
+import com.diplomado.model.SolicitudDTO;
 import com.diplomado.service.SolicitudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/solicitudes")
@@ -24,8 +26,11 @@ public class SolicitudController {
     }
 
     @GetMapping("/pendientes")
-    public List<Solicitud> getSolicitudesPendientes() {
-        return solicitudService.getPendientes();
+    public List<SolicitudDTO> getSolicitudesPendientes() {
+        List<Solicitud> solicitudes = solicitudService.findByEstado("PENDIENTE");
+        return solicitudes.stream()
+                .map(s -> new SolicitudDTO(s.getIdSolicitud(), s.getDependencia(), s.getAsunto(), s.getEstado(), s.getFechaDeSolicitud(), s.getSolicitante().getNombre()))
+                .collect(Collectors.toList());
     }
 }
 

@@ -3,10 +3,13 @@ package com.diplomado.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Data
 @Entity
-@Table(name = "actas")
+@Table(name = "acta")
 public class Acta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int numActas;
@@ -15,6 +18,8 @@ public class Acta {
 
     @ManyToOne
     @JoinColumn(name = "SESION_IDSESION")
+    @JsonBackReference // Esta es la referencia inversa a Sesion
     private Sesion sesion;
 }
+
 

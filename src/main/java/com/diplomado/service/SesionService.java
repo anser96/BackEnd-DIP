@@ -37,20 +37,21 @@ public class SesionService {
     }
 
     public void agregarInvitados(int sesionId, List<Invitado> invitados) {
-        // Busca la sesión por su ID
         Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
 
-        // Procesa cada invitado y lo agrega a la lista de asistencia de invitados
         for (Invitado invitado : invitados) {
-            // Verifica si el invitado ya existe, si no, lo guarda
             Invitado existingInvitado = invitadoRepository.findById(invitado.getIdInvitados()).orElse(invitado);
             invitadoRepository.save(existingInvitado);
 
-            // Crea un nuevo registro de asistencia para el invitado
+            // Crea el ID compuesto
+            AsistenciaInvitadoId asistenciaInvitadoId = new AsistenciaInvitadoId(sesionId, existingInvitado.getIdInvitados());
+
+            // Crea la instancia de AsistenciaInvitado
             AsistenciaInvitado asistenciaInvitado = new AsistenciaInvitado();
+            asistenciaInvitado.setId(asistenciaInvitadoId);
             asistenciaInvitado.setSesion(sesion);
             asistenciaInvitado.setInvitado(existingInvitado);
-            asistenciaInvitado.setEstadoAsistencia("PENDIENTE"); // Puedes ajustar el estado si es necesario
+            asistenciaInvitado.setEstadoAsistencia("PENDIENTE");
 
             asistenciaInvitadoRepository.save(asistenciaInvitado);
         }
@@ -58,34 +59,31 @@ public class SesionService {
 
 
     public void citarMiembros(int sesionId, List<Miembro> miembros) {
-        // Busca la sesión por su ID
         Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
 
-        // Procesa cada miembro y lo agrega a la lista de asistencia de miembros
         for (Miembro miembro : miembros) {
-            // Verifica si el miembro ya existe, si no, lo guarda
             Miembro existingMiembro = miembroRepository.findById(miembro.getIdMiembro()).orElse(miembro);
             miembroRepository.save(existingMiembro);
 
-            // Crea un nuevo registro de asistencia para el miembro
+            // Crea la clave compuesta
+            AsistenciaMiembroId asistenciaMiembroId = new AsistenciaMiembroId(sesionId, existingMiembro.getIdMiembro());
+
+            // Crea la relación de asistencia
             AsistenciaMiembro asistenciaMiembro = new AsistenciaMiembro();
+            asistenciaMiembro.setId(asistenciaMiembroId);
             asistenciaMiembro.setSesion(sesion);
             asistenciaMiembro.setMiembro(existingMiembro);
-            asistenciaMiembro.setEstadoAsistencia("PENDIENTE"); // Puedes ajustar el estado si es necesario
+            asistenciaMiembro.setEstadoAsistencia("PENDIENTE");
 
             asistenciaMiembroRepository.save(asistenciaMiembro);
         }
     }
 
 
+
     public Sesion definirContenido(int sesionId, String contenido) {
-        // Busca la sesión por su ID
-        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
-
-        // Define el contenido de la sesión
-        sesion.setContenido(contenido);
-
-        // Guarda los cambios
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+        sesion.setContenido(contenido);  // Actualiza solo el campo "contenido"
         return sesionRepository.save(sesion);
     }
 
