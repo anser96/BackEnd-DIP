@@ -1,18 +1,22 @@
 package com.diplomado.model;
+
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.List;
 
 @Data
 @Entity
-@Table(name = "miembros")
-public class Miembro {
+@Table(name = "invitados")
+public class Invitado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idMiembro;
+    private int idInvitados;
+
     private String nombre;
+    private String dependencia;
     private String cargo;
-    @OneToMany(mappedBy = "miembro")
-    private List<AsistenciaMiembro> asistenciaMiembros;
+
+    @OneToMany(mappedBy = "invitado")
+    private List<AsistenciaInvitado> asistenciaInvitados;
 }
+
