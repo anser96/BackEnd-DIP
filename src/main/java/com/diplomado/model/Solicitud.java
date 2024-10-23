@@ -17,6 +17,7 @@ public class Solicitud {
     private String desicion;
     private Date fechaDeSolicitud;
     private String respuesta;
+    private String estado;
 
     @ManyToOne
     @JoinColumn(name = "SOLICITANTE_IDSOLICITANTE")
