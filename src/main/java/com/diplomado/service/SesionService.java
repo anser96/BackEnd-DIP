@@ -45,10 +45,39 @@ public class SesionService {
         return sesionRepository.findById(idSesion).orElseThrow();
     }
 
+    public SesionDTO getSesionById(int id) {
+        Sesion sesion = sesionRepository.findById(id).orElse(null);
+
+        if (sesion != null) {
+            // Convertir la entidad Sesion a DTO
+            return convertToDTO(sesion);
+        } else {
+            return null; // Sesión no encontrada
+        }
+    }
+
     public List<SesionDTO> getSesiones() {
         List<Sesion> sesiones = sesionRepository.findAll();
 
         return sesiones.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public SesionDTO updateSesion(int id, SesionDTO sesionDTO) {
+        Sesion sesion = sesionRepository.findById(id).orElse(null);
+
+        if (sesion != null) {
+            // Actualizamos los campos que han sido enviados en el DTO
+            sesion.setLugar(sesionDTO.getLugar());
+            sesion.setFecha(sesionDTO.getFecha());
+            sesion.setHoraInicio(sesionDTO.getHoraInicio());
+            sesion.setHoraFinal(sesionDTO.getHoraFinal());
+            sesion.setContenido(sesionDTO.getContenido());
+
+            Sesion updatedSesion = sesionRepository.save(sesion);
+            return convertToDTO(updatedSesion);
+        } else {
+            return null;
+        }
     }
 
     public SesionDTO convertToDTO(Sesion sesion) {
@@ -59,6 +88,8 @@ public class SesionService {
         dto.setHoraInicio(sesion.getHoraInicio());
         dto.setHoraFinal(sesion.getHoraFinal());
         dto.setContenido(sesion.getContenido());
+        dto.setPresidente(sesion.getPresidente());
+        dto.setSecretario(sesion.getSecretario());
 
         // Obtenemos la asistencia de miembros
         List<AsistenciaMiembroDTO> asistenciaMiembros = asistenciaMiembroRepository.findBySesion(sesion)
@@ -81,7 +112,7 @@ public class SesionService {
                     AsistenciaInvitadoDTO aiDTO = new AsistenciaInvitadoDTO();
                     aiDTO.setIdInvitado(ai.getInvitado().getIdInvitados());
                     aiDTO.setNombre(ai.getInvitado().getNombre());
-                    aiDTO.setCargo(ai.getInvitado().getCargo());
+                    aiDTO.setDependencia(ai.getInvitado().getDependencia());
                     aiDTO.setEstadoAsistencia(ai.getEstadoAsistencia());
                     return aiDTO;
                 })

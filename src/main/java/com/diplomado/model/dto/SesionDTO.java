@@ -17,7 +17,9 @@ public class SesionDTO {
     private LocalDate fecha;
     private String contenido;
     private LocalTime horaInicio;
-    private LocalTime horaFinal; // Agregamos estos dos campos
+    private LocalTime horaFinal;
+    private String presidente;
+    private String Secretario;
 
     // Listas de asistencia de miembros e invitados
     private List<AsistenciaMiembroDTO> asistenciaMiembros;

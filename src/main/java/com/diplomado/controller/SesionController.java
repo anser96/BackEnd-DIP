@@ -90,5 +90,26 @@ public class SesionController {
                 .contenido(sesionActualizada.getContenido())
                 .build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SesionDTO> getSesionById(@PathVariable int id) {
+        SesionDTO sesion = sesionService.getSesionById(id);
+        if (sesion != null) {
+            return ResponseEntity.ok(sesion);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Método para actualizar sesión
+    @PutMapping("/{id}")
+    public ResponseEntity<SesionDTO> updateSesion(@PathVariable int id, @RequestBody SesionDTO sesionDTO) {
+        SesionDTO updatedSesion = sesionService.updateSesion(id, sesionDTO);
+        if (updatedSesion != null) {
+            return ResponseEntity.ok(updatedSesion);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
 

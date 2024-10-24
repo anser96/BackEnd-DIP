@@ -22,6 +22,8 @@ public class Sesion {
     private String contenido; // El contenido que defines en el método
     private LocalTime horaInicio; // Campo para la hora de inicio
     private LocalTime horaFinal; // Campo para la hora de fin
+    private String presidente;
+    private String secretario;
 
     @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
     @JsonManagedReference // Para romper ciclos de serialización
