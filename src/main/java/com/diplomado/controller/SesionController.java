@@ -111,5 +111,10 @@ public class SesionController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteSesion(@PathVariable int id){
+        sesionService.deleteSesion(id);
+    }
 }
 

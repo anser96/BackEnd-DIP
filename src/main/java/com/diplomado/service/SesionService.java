@@ -207,5 +207,9 @@ public class SesionService {
         Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
         // Lógica para verificar quorum
     }
+
+    public void deleteSesion(int id) {
+        sesionRepository.deleteById(id);
+    }
 }
 
