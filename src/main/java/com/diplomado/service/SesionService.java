@@ -1,5 +1,6 @@
 package com.diplomado.service;
 
+import com.diplomado.configuration.exception.FechaNoValidaException;
 import com.diplomado.model.*;
 import com.diplomado.model.dto.ActaDTO;
 import com.diplomado.model.dto.AsistenciaInvitadoDTO;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +40,18 @@ public class SesionService {
     private ActaRepository actaRepository;
 
     public Sesion save(Sesion sesion) {
+        Optional<Sesion> ultimaSesionOpt = sesionRepository.findTopByOrderByFechaDesc();
+
+        if (ultimaSesionOpt.isPresent()) {
+            Sesion ultimaSesion = ultimaSesionOpt.get();
+            LocalDate fechaUltimaSesion = ultimaSesion.getFecha();
+
+            if (!sesion.getFecha().isAfter(fechaUltimaSesion)) {
+                throw new FechaNoValidaException("La fecha de la nueva reunión debe ser posterior a la última reunión registrada, que fue el "
+                        + fechaUltimaSesion.toString());
+            }
+        }
+
         return sesionRepository.save(sesion);
     }
 

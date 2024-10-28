@@ -1,5 +1,7 @@
 package com.diplomado.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import jakarta.persistence.*;
 
@@ -8,9 +10,13 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor  // Constructor sin argumentos
+@AllArgsConstructor // Constructor con todos los argumentos
 @Table(name = "sesion")
 public class Sesion {
     @Id
