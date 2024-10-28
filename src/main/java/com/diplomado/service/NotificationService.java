@@ -20,7 +20,7 @@ public class NotificationService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private static final String SENDGRID_API_KEY = "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\n";
+    private static final String SENDGRID_API_KEY = "${{secrets.EMAIL_SECRETS}}";
 
     public void sendEmail(String recipientEmail, String subject, String text) throws IOException {
         Email from = new Email("asaenzcordero@gmail.com");
