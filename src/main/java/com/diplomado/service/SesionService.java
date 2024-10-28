@@ -214,6 +214,18 @@ public class SesionService {
 
             // Guardamos la relación de asistencia
             asistenciaMiembroRepository.save(asistenciaMiembro);
+            // Enviar notificación por correo
+            String subject = "Invitación a la sesión";
+            String text = "Usted ha sido agregado a una sesión. Detalles de la sesión: " + sesion.getLugar() + ", Fecha: " + sesion.getFecha();
+            try {
+                notificationService.sendEmail(
+                        existingMiembro.getEmail(),
+                        subject,
+                        text
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
