@@ -7,10 +7,12 @@ import com.diplomado.model.dto.AsistenciaInvitadoDTO;
 import com.diplomado.model.dto.AsistenciaMiembroDTO;
 import com.diplomado.model.dto.SesionDTO;
 import com.diplomado.repository.*;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
@@ -38,6 +40,9 @@ public class SesionService {
 
     @Autowired
     private ActaRepository actaRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public Sesion save(Sesion sesion) {
         Optional<Sesion> ultimaSesionOpt = sesionRepository.findTopByOrderByFechaDesc();
@@ -171,6 +176,18 @@ public class SesionService {
             asistenciaInvitado.setEstadoAsistencia("PENDIENTE");
 
             asistenciaInvitadoRepository.save(asistenciaInvitado);
+            // Enviar notificación por correo
+            String subject = "Invitación a la sesión";
+            String text = "Usted ha sido agregado a una sesión. Detalles de la sesión: " + sesion.getLugar() + ", Fecha: " + sesion.getFecha();
+            try {
+                notificationService.sendEmail(
+                        existingInvitado.getEmail(),
+                        subject,
+                        text
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
