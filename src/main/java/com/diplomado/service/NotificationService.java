@@ -23,7 +23,7 @@ public class NotificationService {
     private static final String SENDGRID_API_KEY = "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\n";
 
     public void sendEmail(String recipientEmail, String subject, String text) throws IOException {
-        Email from = new Email("asaenzcordero@gmail.com.com");
+        Email from = new Email("asaenzcordero@gmail.com");
         Email to = new Email(recipientEmail);
         Content content = new Content("text/plain", text);
         Mail mail = new Mail(from, subject, to, content);
@@ -32,7 +32,7 @@ public class NotificationService {
         Request request = new Request();
         try {
             request.setMethod(com.sendgrid.Method.POST);
-            request.setBaseUri("mail/send");
+            request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sg.api(request);
             System.out.println("Status Code: " + response.getStatusCode());
