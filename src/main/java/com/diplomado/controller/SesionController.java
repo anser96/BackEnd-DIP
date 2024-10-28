@@ -27,8 +27,24 @@ public class SesionController {
     private SesionService sesionService;
 
     @PostMapping
-    public Sesion crearSesion(@RequestBody Sesion sesion) {
-        return sesionService.save(sesion);
+    public ResponseEntity<SesionDTO> crearSesion(@RequestBody SesionDTO sesionDTO) {
+        Sesion nuevaSesion = Sesion.builder()
+                .lugar(sesionDTO.getLugar())
+                .fecha(sesionDTO.getFecha())
+                .horaInicio(sesionDTO.getHoraInicio())
+                .horaFinal(sesionDTO.getHoraFinal())
+                .build();
+
+        Sesion sesionCreada = sesionService.save(nuevaSesion);
+        SesionDTO respuesta = SesionDTO.builder()
+                .idSesion(sesionCreada.getIdSesion())
+                .lugar(sesionCreada.getLugar())
+                .fecha(sesionCreada.getFecha())
+                .horaInicio(sesionCreada.getHoraInicio())
+                .horaFinal(sesionCreada.getHoraFinal())
+                .build();
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @PostMapping("/{sesionId}/invitados")

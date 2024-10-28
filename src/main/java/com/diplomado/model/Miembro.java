@@ -13,6 +13,7 @@ public class Miembro {
     private int idMiembro;
     private String nombre;
     private String cargo;
+    private String email;
     @OneToMany(mappedBy = "miembro")
     private List<AsistenciaMiembro> asistenciaMiembros;
 }

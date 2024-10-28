@@ -1,19 +1,23 @@
 package com.diplomado.service;
 
+import com.diplomado.configuration.exception.FechaNoValidaException;
 import com.diplomado.model.*;
 import com.diplomado.model.dto.ActaDTO;
 import com.diplomado.model.dto.AsistenciaInvitadoDTO;
 import com.diplomado.model.dto.AsistenciaMiembroDTO;
 import com.diplomado.model.dto.SesionDTO;
 import com.diplomado.repository.*;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +41,22 @@ public class SesionService {
     @Autowired
     private ActaRepository actaRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public Sesion save(Sesion sesion) {
+        Optional<Sesion> ultimaSesionOpt = sesionRepository.findTopByOrderByFechaDesc();
+
+        if (ultimaSesionOpt.isPresent()) {
+            Sesion ultimaSesion = ultimaSesionOpt.get();
+            LocalDate fechaUltimaSesion = ultimaSesion.getFecha();
+
+            if (!sesion.getFecha().isAfter(fechaUltimaSesion)) {
+                throw new FechaNoValidaException("La fecha de la nueva reunión debe ser posterior a la última reunión registrada, que fue el "
+                        + fechaUltimaSesion.toString());
+            }
+        }
+
         return sesionRepository.save(sesion);
     }
 
@@ -157,6 +176,18 @@ public class SesionService {
             asistenciaInvitado.setEstadoAsistencia("PENDIENTE");
 
             asistenciaInvitadoRepository.save(asistenciaInvitado);
+            // Enviar notificación por correo
+            String subject = "Invitación a la sesión";
+            String text = "Usted ha sido agregado a una sesión. Detalles de la sesión: " + sesion.getLugar() + ", Fecha: " + sesion.getFecha();
+            try {
+                notificationService.sendEmail(
+                        existingInvitado.getEmail(),
+                        subject,
+                        text
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
