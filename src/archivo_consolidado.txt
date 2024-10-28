@@ -1,0 +1,1551 @@
+### DiplomadoActasApplication.java ###
+package com.diplomado;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DiplomadoActasApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DiplomadoActasApplication.class, args);
+	}
+
+}
+
+
+### WebConfig.java ###
+package com.diplomado.configuration;
+
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // Permitir CORS para todas las rutas
+                .allowedOrigins("http://localhost:5173") // Cambia esto según la URL de tu frontend
+                .allowedMethods("GET", "POST", "PUT", "DELETE") // Métodos permitidos
+                .allowedHeaders("*") // Permitir todos los encabezados
+                .allowCredentials(true); // Permitir envío de cookies
+    }
+}
+
+
+### ActaController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Acta;
+import com.diplomado.service.ActaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/actas")
+public class ActaController {
+
+    @Autowired
+    private ActaService actaService;
+
+    @PostMapping
+    public Acta crearActa(@RequestBody Acta acta) {
+        return actaService.save(acta);
+    }
+
+    @PostMapping("/{actaId}/aprobar")
+    public Acta aprobarActa(@PathVariable int actaId) {
+        return actaService.aprobar(actaId);
+    }
+}
+
+
+
+### DescripcionController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Descripcion;
+import com.diplomado.service.DescripcionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/descripciones")
+public class DescripcionController {
+
+    @Autowired
+    private DescripcionService descripcionService;
+
+    // Crear una nueva descripción
+    @PostMapping
+    public Descripcion crearDescripcion(@RequestBody Descripcion descripcion) {
+        return descripcionService.save(descripcion);
+    }
+
+    // Obtener todas las descripciones
+    @GetMapping
+    public List<Descripcion> obtenerDescripciones() {
+        return descripcionService.findAll();
+    }
+
+    // Obtener una descripción por ID
+    @GetMapping("/{id}")
+    public Descripcion obtenerDescripcionPorId(@PathVariable int id) {
+        return descripcionService.findById(id);
+    }
+
+    // Actualizar una descripción
+    @PutMapping("/{id}")
+    public Descripcion actualizarDescripcion(@PathVariable int id, @RequestBody Descripcion descripcionActualizada) {
+        return descripcionService.updateDescripcion(id, descripcionActualizada);
+    }
+
+    // Eliminar una descripción
+    @DeleteMapping("/{id}")
+    public void eliminarDescripcion(@PathVariable int id) {
+        descripcionService.deleteById(id);
+    }
+}
+
+
+
+### MiembroController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Miembro;
+import com.diplomado.service.MiembroService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/miembro")
+public class MiembroController {
+    @Autowired
+    private MiembroService miembroService;
+
+    @GetMapping
+    public List<Miembro> getAllMiembros(){
+        return miembroService.findAllMiembros();
+    }
+
+    @GetMapping("/{id}")
+    public Miembro getMiembroById(@PathVariable int id){
+        return miembroService.findById(id);
+    }
+
+    @PostMapping
+    public Miembro saveMiembro(@RequestBody Miembro miembro){
+        return miembroService.save(miembro);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteMiembro(@PathVariable int id){
+        miembroService.deleteById(id);
+    }
+
+}
+
+
+### SesionController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Invitado;
+import com.diplomado.model.Miembro;
+import com.diplomado.model.Sesion;
+import com.diplomado.model.dto.SesionDTO;
+import com.diplomado.service.SesionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/sesiones")
+public class SesionController {
+
+    @Autowired
+    private SesionService sesionService;
+
+    @PostMapping
+    public Sesion crearSesion(@RequestBody Sesion sesion) {
+        return sesionService.save(sesion);
+    }
+
+    @PostMapping("/{sesionId}/invitados")
+    public void programarInvitados(@PathVariable int sesionId, @RequestBody List<Invitado> invitados) {
+        sesionService.agregarInvitados(sesionId, invitados);
+    }
+
+    @PostMapping("/{sesionId}/miembros")
+    public void citarMiembros(@PathVariable int sesionId, @RequestBody List<Miembro> miembros) {
+        sesionService.citarMiembros(sesionId, miembros);
+    }
+
+    @PostMapping("/{sesionId}/definir-contenido")
+    public SesionDTO definirContenido(@PathVariable int sesionId, @RequestBody Map<String, String> requestBody) {
+        String contenido = requestBody.get("contenido");
+
+        // Actualizar el contenido de la sesión
+        Sesion sesion = sesionService.definirContenido(sesionId, contenido);
+
+        // Convertir la entidad Sesion en DTO con todos los datos asociados
+        return sesionService.convertToDTO(sesion);
+    }
+
+    @GetMapping
+    public List<SesionDTO> getSesiones() {
+        List<Sesion> sesiones = sesionService.findAll();
+
+        // Convertir cada Sesion en un SesionDTO con toda la información relacionada
+        return sesiones.stream()
+                .map(sesion -> sesionService.convertToDTO(sesion))
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/{sesionId}/definir-fechas")
+    public SesionDTO definirFechasSesion(@PathVariable int sesionId, @RequestBody Map<String, String> requestBody) {
+        // Verificamos que los campos existan
+        String fechaStr = requestBody.get("fecha");
+        String horaInicioStr = requestBody.get("horaInicio");
+        String horaFinalStr = requestBody.get("horaFinal");
+
+        // Asegurarnos que los valores no sean null antes de intentar parsearlos
+        if (fechaStr == null || horaInicioStr == null || horaFinalStr == null) {
+            throw new IllegalArgumentException("Todos los campos (fecha, horaInicio, horaFinal) son obligatorios");
+        }
+
+        LocalDate fecha = LocalDate.parse(fechaStr);  // Parsear fecha
+        LocalTime horaInicio = LocalTime.parse(horaInicioStr);  // Parsear hora de inicio
+        LocalTime horaFinal = LocalTime.parse(horaFinalStr);  // Parsear hora de finalización
+
+        Sesion sesionActualizada = sesionService.definirFechas(sesionId, fecha, horaInicio, horaFinal);
+
+        // Devolvemos la sesión actualizada
+        return SesionDTO.builder()
+                .idSesion(sesionActualizada.getIdSesion())
+                .lugar(sesionActualizada.getLugar())
+                .fecha(sesionActualizada.getFecha())
+                .horaInicio(sesionActualizada.getHoraInicio())
+                .horaFinal(sesionActualizada.getHoraFinal())
+                .contenido(sesionActualizada.getContenido())
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SesionDTO> getSesionById(@PathVariable int id) {
+        SesionDTO sesion = sesionService.getSesionById(id);
+        if (sesion != null) {
+            return ResponseEntity.ok(sesion);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Método para actualizar sesión
+    @PutMapping("/{id}")
+    public ResponseEntity<SesionDTO> updateSesion(@PathVariable int id, @RequestBody SesionDTO sesionDTO) {
+        SesionDTO updatedSesion = sesionService.updateSesion(id, sesionDTO);
+        if (updatedSesion != null) {
+            return ResponseEntity.ok(updatedSesion);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteSesion(@PathVariable int id){
+        sesionService.deleteSesion(id);
+    }
+}
+
+
+
+### SolicitanteController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Solicitante;
+import com.diplomado.service.SolicitanteService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/solicitantes")
+public class SolicitanteController {
+
+    @Autowired
+    private SolicitanteService solicitanteService;
+
+    // Crear un nuevo solicitante
+    @PostMapping
+    public Solicitante crearSolicitante(@RequestBody Solicitante solicitante) {
+        return solicitanteService.save(solicitante);
+    }
+
+    // Obtener todos los solicitantes
+    @GetMapping
+    public List<Solicitante> obtenerSolicitantes() {
+        return solicitanteService.findAll();
+    }
+
+    // Obtener un solicitante por ID
+    @GetMapping("/{id}")
+    public Solicitante obtenerSolicitantePorId(@PathVariable int id) {
+        return solicitanteService.findById(id);
+    }
+
+    // Actualizar un solicitante
+    @PutMapping("/{id}")
+    public Solicitante actualizarSolicitante(@PathVariable int id, @RequestBody Solicitante solicitanteActualizado) {
+        return solicitanteService.updateSolicitante(id, solicitanteActualizado);
+    }
+
+    // Eliminar un solicitante
+    @DeleteMapping("/{id}")
+    public void eliminarSolicitante(@PathVariable int id) {
+        solicitanteService.deleteById(id);
+    }
+}
+
+
+
+### SolicitudController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Solicitud;
+import com.diplomado.model.dto.SolicitudDTO;
+import com.diplomado.service.SolicitudService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/solicitudes")
+public class SolicitudController {
+
+    @Autowired
+    private SolicitudService solicitudService;
+
+    @PostMapping
+    public Solicitud crearSolicitud(@RequestBody Solicitud solicitud) {
+        return solicitudService.save(solicitud);
+    }
+
+    @PostMapping("/{solicitudId}/responder")
+    public Solicitud responderSolicitud(@PathVariable int solicitudId, @RequestBody String respuesta) {
+        return solicitudService.responder(solicitudId, respuesta);
+    }
+
+    @GetMapping("/pendientes")
+    public List<SolicitudDTO> getSolicitudesPendientes() {
+        List<Solicitud> solicitudes = solicitudService.findByEstado("PENDIENTE");
+        return solicitudes.stream()
+                .map(s -> new SolicitudDTO(s.getIdSolicitud(), s.getDependencia(), s.getAsunto(), s.getEstado(), s.getFechaDeSolicitud(), s.getSolicitante().getNombre()))
+                .collect(Collectors.toList());
+    }
+}
+
+
+
+### TareaController.java ###
+package com.diplomado.controller;
+
+import com.diplomado.model.Tarea;
+import com.diplomado.service.TareaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/tareas")
+public class TareaController {
+
+    @Autowired
+    private TareaService tareaService;
+
+    @PostMapping
+    public Tarea asignarTarea(@RequestBody Tarea tarea) {
+        return tareaService.save(tarea);
+    }
+
+    @GetMapping
+    public List<Tarea> getAllTareas() {
+        return tareaService.findAll();
+    }
+}
+
+
+
+### Acta.java ###
+package com.diplomado.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Data
+@Entity
+@Table(name = "acta")
+public class Acta {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Esto asegura que el ID sea generado automáticamente
+    @Column(name = "ID_ACTA")  // Mapea a la columna correcta en la base de datos
+    private int idActa;
+
+    private String estado;
+
+    @ManyToOne
+    @JoinColumn(name = "SESION_IDSESION")
+    @JsonBackReference // Esta es la referencia inversa a Sesion
+    private Sesion sesion;
+}
+
+
+
+
+### AsistenciaInvitado.java ###
+package com.diplomado.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Data
+@Entity
+@Table(name = "asistencia_invitado")
+public class AsistenciaInvitado {
+
+    @EmbeddedId
+    private AsistenciaInvitadoId id;
+
+    @ManyToOne
+    @MapsId("sesionId")
+    @JoinColumn(name = "SESION_IDSESION")
+    @JsonBackReference // Para romper ciclos de serialización
+    private Sesion sesion;
+
+    @ManyToOne
+    @MapsId("invitadoId")
+    @JoinColumn(name = "INVITADO_IDINVITADO")
+    private Invitado invitado;
+
+    private String estadoAsistencia;
+}
+
+
+
+
+### AsistenciaInvitadoId.java ###
+package com.diplomado.model;
+import lombok.Data;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+import java.util.Objects;
+
+@Data
+@Embeddable
+public class AsistenciaInvitadoId implements Serializable {
+
+    private int sesionId;
+    private int invitadoId;
+
+    // Constructor vacío para JPA
+    public AsistenciaInvitadoId() {}
+
+    // Constructor con parámetros
+    public AsistenciaInvitadoId(int sesionId, int invitadoId) {
+        this.sesionId = sesionId;
+        this.invitadoId = invitadoId;
+    }
+
+    // Sobrescribir equals() y hashCode()
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AsistenciaInvitadoId that = (AsistenciaInvitadoId) o;
+        return sesionId == that.sesionId && invitadoId == that.invitadoId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sesionId, invitadoId);
+    }
+}
+
+
+
+### AsistenciaMiembro.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Data
+@Entity
+@Table(name = "asistencia_miembros")
+public class AsistenciaMiembro {
+
+    @EmbeddedId
+    private AsistenciaMiembroId id;
+
+    @ManyToOne
+    @MapsId("sesionId")
+    @JoinColumn(name = "SESION_IDSESION")
+    @JsonBackReference // Para romper ciclos de serialización
+    private Sesion sesion;
+
+    @ManyToOne
+    @MapsId("miembroId")
+    @JoinColumn(name = "MIEMBRO_IDMIEMBRO")
+    private Miembro miembro;
+
+    private String estadoAsistencia;
+}
+
+
+### AsistenciaMiembroId.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+import java.util.Objects;
+
+@Data
+@Embeddable
+public class AsistenciaMiembroId implements Serializable {
+
+    private int sesionId;
+    private int miembroId;
+
+    public AsistenciaMiembroId() {}
+
+    public AsistenciaMiembroId(int sesionId, int miembroId) {
+        this.sesionId = sesionId;
+        this.miembroId = miembroId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AsistenciaMiembroId that = (AsistenciaMiembroId) o;
+        return sesionId == that.sesionId && miembroId == that.miembroId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sesionId, miembroId);
+    }
+}
+
+
+
+
+### Descripcion.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.*;
+
+@Data
+@Entity
+@Table(name = "descricion")
+public class Descripcion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idDescripcion;
+
+    private String estuImplicados;
+    private int numEstuImplicados;
+    private String docenImplicados;
+    private int numDocenImplicados;
+    private String cuidadImplicada;
+    private String paisImplicado;
+    private String evento;
+}
+
+
+
+### Invitado.java ###
+package com.diplomado.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "invitados")
+public class Invitado {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idInvitados;
+
+    private String nombre;
+    private String dependencia;
+    private String estadoAsistencia;
+
+    @OneToMany(mappedBy = "invitado")
+    private List<AsistenciaInvitado> asistenciaInvitados;
+}
+
+
+
+### Miembro.java ###
+package com.diplomado.model;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "miembros")
+public class Miembro {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idMiembro;
+    private String nombre;
+    private String cargo;
+    @OneToMany(mappedBy = "miembro")
+    private List<AsistenciaMiembro> asistenciaMiembros;
+}
+
+
+### Sesion.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+@Data
+@Entity
+@Table(name = "sesion")
+public class Sesion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idSesion;
+
+    private String lugar;
+    private LocalDate fecha;
+    private String contenido; // El contenido que defines en el método
+    private LocalTime horaInicio; // Campo para la hora de inicio
+    private LocalTime horaFinal; // Campo para la hora de fin
+    private String presidente;
+    private String secretario;
+
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    @JsonManagedReference // Para romper ciclos de serialización
+    private List<AsistenciaMiembro> asistenciaMiembros;
+
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    @JsonManagedReference // Para romper ciclos de serialización
+    private List<AsistenciaInvitado> asistenciaInvitados;
+
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL)
+    @JsonManagedReference // Para romper ciclos de serialización con Acta
+    private List<Acta> actas;
+}
+
+
+
+### Solicitante.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.*;
+
+@Data
+@Entity
+@Table(name = "solicitantes")
+public class Solicitante {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idSolicitante;
+
+    private String nombre;
+    private String tipoDeSolicitante;
+    private String email;
+    private String celular;
+}
+
+
+
+### Solicitud.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.*;
+import java.util.Date;
+
+@Data
+@Entity
+@Table(name = "solicitud")
+public class Solicitud {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idSolicitud;
+
+    private String dependencia;
+    private String asunto;
+    private String desicion;
+    private Date fechaDeSolicitud;
+    private String respuesta;
+    private String estado;
+
+    @ManyToOne
+    @JoinColumn(name = "SOLICITANTE_IDSOLICITANTE")
+    private Solicitante solicitante;
+
+    @ManyToOne
+    @JoinColumn(name = "SESION_IDSESION")
+    private Sesion sesion;
+
+    @ManyToOne
+    @JoinColumn(name = "DESCRIPCION_IDDESCRIPCION")
+    private Descripcion descripcion;
+}
+
+
+
+### Tarea.java ###
+package com.diplomado.model;
+
+import lombok.Data;
+import jakarta.persistence.*;
+import java.util.Date;
+
+@Data
+@Entity
+@Table(name = "tareas")
+public class Tarea {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idTarea;
+
+    private String descripcion;
+    private String responsable;
+    private Date fechaLimite;
+}
+
+
+
+### ActaDTO.java ###
+package com.diplomado.model.dto;
+
+
+import lombok.Data;
+
+@Data
+public class ActaDTO {
+    private int idActa;
+    private String estado;
+}
+
+
+### AsistenciaInvitadoDTO.java ###
+package com.diplomado.model.dto;
+
+import lombok.Data;
+
+@Data
+public class AsistenciaInvitadoDTO {
+    private int idInvitado;
+    private String nombre;
+    private String dependencia;
+    private String estadoAsistencia;
+}
+
+
+### AsistenciaMiembroDTO.java ###
+package com.diplomado.model.dto;
+
+import lombok.Data;
+
+@Data
+public class AsistenciaMiembroDTO {
+    private int idMiembro;
+    private String nombre;
+    private String cargo;
+    private String estadoAsistencia;
+}
+
+
+### SesionDTO.java ###
+package com.diplomado.model.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.List;
+
+@Data
+@Builder
+public class SesionDTO {
+    private int idSesion;
+    private String lugar;
+    private LocalDate fecha;
+    private String contenido;
+    private LocalTime horaInicio;
+    private LocalTime horaFinal;
+    private String presidente;
+    private String Secretario;
+
+    // Listas de asistencia de miembros e invitados
+    private List<AsistenciaMiembroDTO> asistenciaMiembros;
+    private List<AsistenciaInvitadoDTO> asistenciaInvitados;
+
+    // Lista de actas relacionadas a la sesión
+    private List<ActaDTO> actas;
+}
+
+
+
+### SolicitudDTO.java ###
+package com.diplomado.model.dto;
+
+import lombok.Data;
+
+import java.util.Date;
+
+@Data
+public class SolicitudDTO {
+    private int idSolicitud;
+    private String dependencia;
+    private String asunto;
+    private String estado;
+    private Date fechaDeSolicitud;
+    private String solicitanteNombre;
+
+    // Constructor
+    public SolicitudDTO(int idSolicitud, String dependencia, String asunto, String estado, Date fechaDeSolicitud, String solicitanteNombre) {
+        this.idSolicitud = idSolicitud;
+        this.dependencia = dependencia;
+        this.asunto = asunto;
+        this.estado = estado;
+        this.fechaDeSolicitud = fechaDeSolicitud;
+        this.solicitanteNombre = solicitanteNombre;
+    }
+
+    // Getters y Setters (puedes generarlos con Lombok si prefieres)
+}
+
+
+### ActaRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Acta;
+import com.diplomado.model.AsistenciaMiembro;
+import com.diplomado.model.Sesion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ActaRepository extends JpaRepository<Acta, Integer> {
+    List<Acta> findBySesion(Sesion sesion);
+}
+
+
+
+### AsistenciaInvitadoRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.AsistenciaInvitado;
+import com.diplomado.model.AsistenciaInvitadoId;
+import com.diplomado.model.AsistenciaMiembro;
+import com.diplomado.model.Sesion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface AsistenciaInvitadoRepository extends JpaRepository<AsistenciaInvitado, AsistenciaInvitadoId> {
+    List<AsistenciaInvitado> findBySesion(Sesion sesion);
+}
+
+
+
+### AsistenciaMiembroRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.AsistenciaMiembro;
+import com.diplomado.model.AsistenciaMiembroId;
+import com.diplomado.model.Sesion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface AsistenciaMiembroRepository extends JpaRepository<AsistenciaMiembro, AsistenciaMiembroId> {
+    List<AsistenciaMiembro> findBySesion(Sesion sesion);
+}
+
+
+
+### DescripcionRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Descripcion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DescripcionRepository extends JpaRepository<Descripcion, Integer> {
+}
+
+
+
+### InvitadoRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Invitado;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface InvitadoRepository extends JpaRepository<Invitado, Integer> {
+}
+
+
+
+### MiembroRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Miembro;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface MiembroRepository extends JpaRepository<Miembro, Integer> {
+}
+
+
+### SesionRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Sesion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface SesionRepository extends JpaRepository<Sesion, Integer> {
+}
+
+
+### SolicitanteRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Solicitante;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface SolicitanteRepository extends JpaRepository<Solicitante, Integer> {
+}
+
+
+
+### SolicitudRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Solicitud;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface SolicitudRepository extends JpaRepository<Solicitud, Integer> {
+    List<Solicitud> findByEstado(String estado);
+}
+
+
+
+### TareaRepository.java ###
+package com.diplomado.repository;
+
+import com.diplomado.model.Tarea;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface TareaRepository extends JpaRepository<Tarea, Integer> {
+}
+
+
+### ActaService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.Acta;
+import com.diplomado.repository.ActaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ActaService {
+
+    @Autowired
+    private ActaRepository actaRepository;
+
+    public Acta save(Acta acta) {
+        return actaRepository.save(acta);
+    }
+
+    public Acta aprobar(int actaId) {
+        Acta acta = actaRepository.findById(actaId).orElseThrow();
+        acta.setEstado("APROBADA");
+        return actaRepository.save(acta);
+    }
+}
+
+
+### AsistenciaInvitadoService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.AsistenciaInvitado;
+import com.diplomado.model.AsistenciaInvitadoId;
+import com.diplomado.repository.AsistenciaInvitadoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AsistenciaInvitadoService {
+
+    @Autowired
+    private AsistenciaInvitadoRepository asistenciaInvitadoRepository;
+
+    public AsistenciaInvitado save(AsistenciaInvitado asistenciaInvitado) {
+        return asistenciaInvitadoRepository.save(asistenciaInvitado);
+    }
+
+    public AsistenciaInvitado findById(AsistenciaInvitadoId id) {
+        return asistenciaInvitadoRepository.findById(id).orElseThrow();
+    }
+
+    public void registrarAsistencia(int sesionId, int invitadoId, String estadoAsistencia) {
+        AsistenciaInvitadoId asistenciaId = new AsistenciaInvitadoId(sesionId, invitadoId);
+        AsistenciaInvitado asistencia = asistenciaInvitadoRepository.findById(asistenciaId)
+                .orElse(new AsistenciaInvitado());
+        asistencia.setEstadoAsistencia(estadoAsistencia);
+        asistenciaInvitadoRepository.save(asistencia);
+    }
+}
+
+
+
+### AsistenciaMiembroService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.AsistenciaMiembro;
+import com.diplomado.model.AsistenciaMiembroId;
+import com.diplomado.repository.AsistenciaMiembroRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AsistenciaMiembroService {
+
+    @Autowired
+    private AsistenciaMiembroRepository asistenciaMiembroRepository;
+
+    public AsistenciaMiembro save(AsistenciaMiembro asistenciaMiembro) {
+        return asistenciaMiembroRepository.save(asistenciaMiembro);
+    }
+
+    public AsistenciaMiembro findById(AsistenciaMiembroId id) {
+        return asistenciaMiembroRepository.findById(id).orElseThrow();
+    }
+
+    public void registrarAsistencia(int sesionId, int miembroId, String estadoAsistencia) {
+        AsistenciaMiembroId asistenciaId = new AsistenciaMiembroId(sesionId, miembroId);
+        AsistenciaMiembro asistencia = asistenciaMiembroRepository.findById(asistenciaId)
+                .orElse(new AsistenciaMiembro());
+        asistencia.setEstadoAsistencia(estadoAsistencia);
+        asistenciaMiembroRepository.save(asistencia);
+    }
+}
+
+
+
+### DescripcionService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.Descripcion;
+import com.diplomado.repository.DescripcionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class DescripcionService {
+
+    @Autowired
+    private DescripcionRepository descripcionRepository;
+
+    public Descripcion save(Descripcion descripcion) {
+        return descripcionRepository.save(descripcion);
+    }
+
+    public List<Descripcion> findAll() {
+        return descripcionRepository.findAll();
+    }
+
+    public Descripcion findById(int id) {
+        return descripcionRepository.findById(id).orElseThrow(() -> new RuntimeException("Descripcion no encontrada con el id: " + id));
+    }
+
+    public Descripcion updateDescripcion(int id, Descripcion descripcionActualizada) {
+        Descripcion descripcion = descripcionRepository.findById(id).orElseThrow(() -> new RuntimeException("Descripcion no encontrada con el id: " + id));
+        descripcion.setEstuImplicados(descripcionActualizada.getEstuImplicados());
+        descripcion.setNumEstuImplicados(descripcionActualizada.getNumEstuImplicados());
+        descripcion.setDocenImplicados(descripcionActualizada.getDocenImplicados());
+        descripcion.setNumDocenImplicados(descripcionActualizada.getNumDocenImplicados());
+        descripcion.setCuidadImplicada(descripcionActualizada.getCuidadImplicada());
+        descripcion.setPaisImplicado(descripcionActualizada.getPaisImplicado());
+        descripcion.setEvento(descripcionActualizada.getEvento());
+        return descripcionRepository.save(descripcion);
+    }
+
+    public void deleteById(int id) {
+        descripcionRepository.deleteById(id);
+    }
+}
+
+
+
+### MiembroService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.Miembro;
+import com.diplomado.repository.MiembroRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class MiembroService {
+    @Autowired
+    private MiembroRepository miembroRepository;
+
+    public List<Miembro> findAllMiembros(){
+        return miembroRepository.findAll();
+    }
+
+    public Miembro findById(int id){
+        return miembroRepository.findById(id).orElse(null);
+    }
+
+    public Miembro save(Miembro miembro){
+        return miembroRepository.save(miembro);
+    }
+
+    public void deleteById(int id){
+        miembroRepository.deleteById(id);
+    }
+}
+
+
+### SesionService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.*;
+import com.diplomado.model.dto.ActaDTO;
+import com.diplomado.model.dto.AsistenciaInvitadoDTO;
+import com.diplomado.model.dto.AsistenciaMiembroDTO;
+import com.diplomado.model.dto.SesionDTO;
+import com.diplomado.repository.*;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class SesionService {
+
+    @Autowired
+    private SesionRepository sesionRepository;
+
+    @Autowired
+    private InvitadoRepository invitadoRepository;
+
+    @Autowired
+    private AsistenciaInvitadoRepository asistenciaInvitadoRepository;
+
+    @Autowired
+    private MiembroRepository miembroRepository;
+
+    @Autowired
+    private AsistenciaMiembroRepository asistenciaMiembroRepository;
+
+    @Autowired
+    private ActaRepository actaRepository;
+
+    public Sesion save(Sesion sesion) {
+        return sesionRepository.save(sesion);
+    }
+
+    public Sesion findById(int idSesion) {
+        return sesionRepository.findById(idSesion).orElseThrow();
+    }
+
+    public SesionDTO getSesionById(int id) {
+        Sesion sesion = sesionRepository.findById(id).orElse(null);
+
+        if (sesion != null) {
+            // Convertir la entidad Sesion a DTO
+            return convertToDTO(sesion);
+        } else {
+            return null; // Sesión no encontrada
+        }
+    }
+
+    public List<SesionDTO> getSesiones() {
+        List<Sesion> sesiones = sesionRepository.findAll();
+
+        return sesiones.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public SesionDTO updateSesion(int id, SesionDTO sesionDTO) {
+        Sesion sesion = sesionRepository.findById(id).orElse(null);
+
+        if (sesion != null) {
+            // Actualizamos los campos que han sido enviados en el DTO
+            sesion.setLugar(sesionDTO.getLugar());
+            sesion.setFecha(sesionDTO.getFecha());
+            sesion.setHoraInicio(sesionDTO.getHoraInicio());
+            sesion.setHoraFinal(sesionDTO.getHoraFinal());
+            sesion.setContenido(sesionDTO.getContenido());
+
+            Sesion updatedSesion = sesionRepository.save(sesion);
+            return convertToDTO(updatedSesion);
+        } else {
+            return null;
+        }
+    }
+
+    public SesionDTO convertToDTO(Sesion sesion) {
+        SesionDTO dto = SesionDTO.builder().build();
+        dto.setIdSesion(sesion.getIdSesion());
+        dto.setLugar(sesion.getLugar());
+        dto.setFecha(sesion.getFecha());
+        dto.setHoraInicio(sesion.getHoraInicio());
+        dto.setHoraFinal(sesion.getHoraFinal());
+        dto.setContenido(sesion.getContenido());
+        dto.setPresidente(sesion.getPresidente());
+        dto.setSecretario(sesion.getSecretario());
+
+        // Obtenemos la asistencia de miembros
+        List<AsistenciaMiembroDTO> asistenciaMiembros = asistenciaMiembroRepository.findBySesion(sesion)
+                .stream()
+                .map(am -> {
+                    AsistenciaMiembroDTO amDTO = new AsistenciaMiembroDTO();
+                    amDTO.setIdMiembro(am.getMiembro().getIdMiembro());
+                    amDTO.setNombre(am.getMiembro().getNombre());
+                    amDTO.setCargo(am.getMiembro().getCargo());
+                    amDTO.setEstadoAsistencia(am.getEstadoAsistencia());
+                    return amDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setAsistenciaMiembros(asistenciaMiembros);
+
+        // Obtenemos la asistencia de invitados
+        List<AsistenciaInvitadoDTO> asistenciaInvitados = asistenciaInvitadoRepository.findBySesion(sesion)
+                .stream()
+                .map(ai -> {
+                    AsistenciaInvitadoDTO aiDTO = new AsistenciaInvitadoDTO();
+                    aiDTO.setIdInvitado(ai.getInvitado().getIdInvitados());
+                    aiDTO.setNombre(ai.getInvitado().getNombre());
+                    aiDTO.setDependencia(ai.getInvitado().getDependencia());
+                    aiDTO.setEstadoAsistencia(ai.getEstadoAsistencia());
+                    return aiDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setAsistenciaInvitados(asistenciaInvitados);
+
+        // Obtenemos las actas relacionadas con la sesión
+        List<ActaDTO> actas = actaRepository.findBySesion(sesion)
+                .stream()
+                .map(acta -> {
+                    ActaDTO actaDTO = new ActaDTO();
+                    actaDTO.setIdActa(acta.getIdActa());
+                    actaDTO.setEstado(acta.getEstado());
+                    return actaDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setActas(actas);
+
+        return dto;
+    }
+
+
+    public List<Sesion> findAll() {
+        return sesionRepository.findAll();
+    }
+
+    public void agregarInvitados(int sesionId, List<Invitado> invitados) {
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
+
+        for (Invitado invitado : invitados) {
+            Invitado existingInvitado = invitadoRepository.findById(invitado.getIdInvitados()).orElse(invitado);
+            invitadoRepository.save(existingInvitado);
+
+            // Crea el ID compuesto
+            AsistenciaInvitadoId asistenciaInvitadoId = new AsistenciaInvitadoId(sesionId, existingInvitado.getIdInvitados());
+
+            // Crea la instancia de AsistenciaInvitado
+            AsistenciaInvitado asistenciaInvitado = new AsistenciaInvitado();
+            asistenciaInvitado.setId(asistenciaInvitadoId);
+            asistenciaInvitado.setSesion(sesion);
+            asistenciaInvitado.setInvitado(existingInvitado);
+            asistenciaInvitado.setEstadoAsistencia("PENDIENTE");
+
+            asistenciaInvitadoRepository.save(asistenciaInvitado);
+        }
+    }
+
+
+    @Transactional
+    public void citarMiembros(int sesionId, List<Miembro> miembros) {
+        // Buscamos la sesión, si no se encuentra lanzamos una excepción
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+
+        for (Miembro miembro : miembros) {
+            // Verificamos si el miembro ya existe en la BD, si no existe lo creamos
+            Miembro existingMiembro = miembroRepository.findById(miembro.getIdMiembro()).orElse(miembro);
+            miembroRepository.save(existingMiembro);  // Guardamos el miembro en caso de que no exista
+
+            // Creamos la clave compuesta (sesionId, miembroId)
+            AsistenciaMiembroId asistenciaMiembroId = new AsistenciaMiembroId(sesionId, existingMiembro.getIdMiembro());
+
+            // Creamos la relación de asistencia
+            AsistenciaMiembro asistenciaMiembro = new AsistenciaMiembro();
+            asistenciaMiembro.setId(asistenciaMiembroId);
+            asistenciaMiembro.setSesion(sesion);
+            asistenciaMiembro.setMiembro(existingMiembro);
+            asistenciaMiembro.setEstadoAsistencia("PENDIENTE");  // Inicializamos con "PENDIENTE"
+
+            // Guardamos la relación de asistencia
+            asistenciaMiembroRepository.save(asistenciaMiembro);
+        }
+    }
+
+
+
+    public Sesion definirContenido(int sesionId, String contenido) {
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+        sesion.setContenido(contenido);  // Actualiza solo el campo "contenido"
+        return sesionRepository.save(sesion);
+    }
+
+    public Sesion definirFechas(int sesionId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+        sesion.setFecha(fecha);
+        sesion.setHoraInicio(horaInicio);
+        sesion.setHoraFinal(horaFin);
+        return sesionRepository.save(sesion);
+    }
+
+
+    public void verificarQuorum(int sesionId) {
+        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
+        // Lógica para verificar quorum
+    }
+
+    public void deleteSesion(int id) {
+        sesionRepository.deleteById(id);
+    }
+}
+
+
+
+### SolicitanteService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.Solicitante;
+import com.diplomado.repository.SolicitanteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class SolicitanteService {
+
+    @Autowired
+    private SolicitanteRepository solicitanteRepository;
+
+    public Solicitante save(Solicitante solicitante) {
+        return solicitanteRepository.save(solicitante);
+    }
+
+    public List<Solicitante> findAll() {
+        return solicitanteRepository.findAll();
+    }
+
+    public Solicitante findById(int id) {
+        return solicitanteRepository.findById(id).orElseThrow(() -> new RuntimeException("Solicitante no encontrado con el id: " + id));
+    }
+
+    public Solicitante updateSolicitante(int id, Solicitante solicitanteActualizado) {
+        Solicitante solicitante = solicitanteRepository.findById(id).orElseThrow(() -> new RuntimeException("Solicitante no encontrado con el id: " + id));
+        solicitante.setNombre(solicitanteActualizado.getNombre());
+        solicitante.setTipoDeSolicitante(solicitanteActualizado.getTipoDeSolicitante());
+        solicitante.setEmail(solicitanteActualizado.getEmail());
+        solicitante.setCelular(solicitanteActualizado.getCelular());
+        return solicitanteRepository.save(solicitante);
+    }
+
+    public void deleteById(int id) {
+        solicitanteRepository.deleteById(id);
+    }
+}
+
+
+
+### SolicitudService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.Solicitud;
+import com.diplomado.repository.SolicitudRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class SolicitudService {
+
+    @Autowired
+    private SolicitudRepository solicitudRepository;
+
+    public Solicitud save(Solicitud solicitud) {
+        return solicitudRepository.save(solicitud);
+    }
+
+    public Solicitud findById(int idSolicitud) {
+        return solicitudRepository.findById(idSolicitud).orElseThrow();
+    }
+
+    public List<Solicitud> getPendientes() {
+        return solicitudRepository.findByEstado("PENDIENTE");
+    }
+
+    public Solicitud responder(int solicitudId, String respuesta) {
+        Solicitud solicitud = solicitudRepository.findById(solicitudId).orElseThrow();
+        solicitud.setRespuesta(respuesta);
+        return solicitudRepository.save(solicitud);
+    }
+
+    public List<Solicitud> findByEstado(String estado) {
+        return solicitudRepository.findByEstado(estado);
+    }
+}
+
+
+
+### TareaService.java ###
+package com.diplomado.service;
+
+import com.diplomado.model.Tarea;
+import com.diplomado.repository.TareaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class TareaService {
+
+    @Autowired
+    private TareaRepository tareaRepository;
+
+    // Método para guardar una tarea
+    public Tarea save(Tarea tarea) {
+        return tareaRepository.save(tarea);
+    }
+
+    // Método para obtener todas las tareas
+    public List<Tarea> findAll() {
+        return tareaRepository.findAll();
+    }
+
+    // Método para buscar una tarea por ID
+    public Tarea findById(int idTarea) {
+        return tareaRepository.findById(idTarea).orElseThrow(() ->
+                new RuntimeException("Tarea no encontrada con el id: " + idTarea));
+    }
+
+    // Método para eliminar una tarea por ID
+    public void deleteById(int idTarea) {
+        tareaRepository.deleteById(idTarea);
+    }
+
+    // Método para actualizar una tarea
+    public Tarea updateTarea(int idTarea, Tarea tareaActualizada) {
+        Tarea tarea = tareaRepository.findById(idTarea).orElseThrow(() ->
+                new RuntimeException("Tarea no encontrada con el id: " + idTarea));
+        tarea.setDescripcion(tareaActualizada.getDescripcion());
+        tarea.setResponsable(tareaActualizada.getResponsable());
+        tarea.setFechaLimite(tareaActualizada.getFechaLimite());
+        return tareaRepository.save(tarea);
+    }
+}
+
+
+
+### DiplomadoActasApplicationTests.java ###
+package com.diplomado.diplomadoActas;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class DiplomadoActasApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
+
+
