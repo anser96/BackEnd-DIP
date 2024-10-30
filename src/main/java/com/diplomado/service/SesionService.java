@@ -56,6 +56,10 @@ public class SesionService {
                         + fechaUltimaSesion.toString());
             }
         }
+        // Asegurarse de que Presidente y Secretario no estén vacíos antes de guardar
+        if (sesion.getPresidente() == null || sesion.getSecretario() == null) {
+            throw new IllegalArgumentException("Presidente y Secretario son campos obligatorios.");
+        }
 
         return sesionRepository.save(sesion);
     }
@@ -118,6 +122,7 @@ public class SesionService {
                     amDTO.setIdMiembro(am.getMiembro().getIdMiembro());
                     amDTO.setNombre(am.getMiembro().getNombre());
                     amDTO.setCargo(am.getMiembro().getCargo());
+                    amDTO.setEmail(am.getMiembro().getEmail());
                     amDTO.setEstadoAsistencia(am.getEstadoAsistencia());
                     return amDTO;
                 })
@@ -132,6 +137,7 @@ public class SesionService {
                     aiDTO.setIdInvitado(ai.getInvitado().getIdInvitados());
                     aiDTO.setNombre(ai.getInvitado().getNombre());
                     aiDTO.setDependencia(ai.getInvitado().getDependencia());
+                    aiDTO.setEmail(ai.getInvitado().getEmail());
                     aiDTO.setEstadoAsistencia(ai.getEstadoAsistencia());
                     return aiDTO;
                 })
