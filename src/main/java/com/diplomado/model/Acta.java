@@ -15,6 +15,8 @@ public class Acta {
     @Column(name = "ID_ACTA")  // Mapea a la columna correcta en la base de datos
     private int idActa;
 
+    private String numeroActa;
+
     private String estado;
 
     @ManyToOne
