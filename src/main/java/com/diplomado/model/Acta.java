@@ -19,7 +19,7 @@ public class Acta {
     private int numeroActa;
 
     private String estado;
-    
+
 
     @ManyToOne
     @JoinColumn(name = "SESION_IDSESION")
