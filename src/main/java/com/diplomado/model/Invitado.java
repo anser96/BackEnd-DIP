@@ -15,6 +15,7 @@ public class Invitado {
     private String nombre;
     private String dependencia;
     private String estadoAsistencia;
+    private String email;
 
     @OneToMany(mappedBy = "invitado")
     private List<AsistenciaInvitado> asistenciaInvitados;
