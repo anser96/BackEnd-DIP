@@ -15,12 +15,17 @@ public class Acta {
     @Column(name = "ID_ACTA")  // Mapea a la columna correcta en la base de datos
     private int idActa;
 
+    @Column(name = "NUMERO_ACTA")  // Asegúrate de que exista esta columna en la tabla "acta"
+    private int numeroActa;
+
     private String estado;
+
 
     @ManyToOne
     @JoinColumn(name = "SESION_IDSESION")
     @JsonBackReference // Esta es la referencia inversa a Sesion
     private Sesion sesion;
 }
+
 
 

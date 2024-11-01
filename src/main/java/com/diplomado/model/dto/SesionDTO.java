@@ -19,7 +19,7 @@ public class SesionDTO {
     private LocalTime horaInicio;
     private LocalTime horaFinal;
     private String presidente;
-    private String Secretario;
+    private String secretario;
 
     // Listas de asistencia de miembros e invitados
     private List<AsistenciaMiembroDTO> asistenciaMiembros;

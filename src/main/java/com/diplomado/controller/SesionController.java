@@ -30,6 +30,8 @@ public class SesionController {
                 .fecha(sesionDTO.getFecha())
                 .horaInicio(sesionDTO.getHoraInicio())
                 .horaFinal(sesionDTO.getHoraFinal())
+                .presidente(sesionDTO.getPresidente())
+                .secretario(sesionDTO.getSecretario())
                 .build();
 
         Sesion sesionCreada = sesionService.save(nuevaSesion);
@@ -39,6 +41,8 @@ public class SesionController {
                 .fecha(sesionCreada.getFecha())
                 .horaInicio(sesionCreada.getHoraInicio())
                 .horaFinal(sesionCreada.getHoraFinal())
+                .presidente(sesionCreada.getPresidente())
+                .secretario(sesionCreada.getSecretario())
                 .build();
 
         return ResponseEntity.ok(new ApiResponse<>("success", "Sesión creada con éxito", respuesta));

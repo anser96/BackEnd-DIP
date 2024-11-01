@@ -20,6 +20,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
@@ -41,7 +44,7 @@ public class WebConfig {
                 .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/h2-console/**", "/v3/api-docs/**",
-                                "/swagger-ui/**", "/swagger-ui.html").permitAll() // Permitir acceso a rutas públicas
+                                "/swagger-ui/**", "/swagger-ui.html", "/api/**").permitAll() // Permitir acceso a rutas públicas
                         .anyRequest().authenticated() // Requerir autenticación para el resto
                 )
                 .sessionManagement(session -> session
@@ -52,18 +55,6 @@ public class WebConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Permitir origen específico
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Permitir métodos específicos
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With")); // Permitir encabezados
-        configuration.setAllowCredentials(true); // Permitir credenciales
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -81,5 +72,18 @@ public class WebConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // Codificador de contraseñas
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:5174"); // Cambia esta URL a la de tu frontend
+        configuration.addAllowedMethod("*"); // Permitir todos los métodos (GET, POST, etc.)
+        configuration.addAllowedHeader("*"); // Permitir todos los encabezados
+        configuration.setAllowCredentials(true); // Permitir credenciales, si es necesario
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
