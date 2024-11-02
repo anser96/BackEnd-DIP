@@ -33,5 +33,9 @@ public class SolicitudService {
     public List<Solicitud> findByEstado(String estado) {
         return solicitudRepository.findByEstado(estado);
     }
+
+    public  List<Solicitud> findAll(){
+        return solicitudRepository.findAll();
+    }
 }
 

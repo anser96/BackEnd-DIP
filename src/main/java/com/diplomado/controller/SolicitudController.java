@@ -32,5 +32,10 @@ public class SolicitudController {
                 .map(s -> new SolicitudDTO(s.getIdSolicitud(), s.getDependencia(), s.getAsunto(), s.getEstado(), s.getFechaDeSolicitud(), s.getSolicitante().getNombre()))
                 .collect(Collectors.toList());
     }
+
+    @GetMapping
+    public List<Solicitud> getAll(){
+        return solicitudService.findAll();
+    }
 }
 
