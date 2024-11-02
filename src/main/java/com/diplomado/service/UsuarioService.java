@@ -1,5 +1,6 @@
 package com.diplomado.service;
 import com.diplomado.model.Usuario;
+import com.diplomado.model.dto.UsuarioDTO;
 import com.diplomado.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,5 +36,13 @@ public class UsuarioService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con el correo: " + correo));
 
         return new User(usuario.getCorreo(), usuario.getContrasena(), Collections.emptyList());
+    }
+
+    public UsuarioDTO convertirAUsuarioDTO(Usuario usuario) {
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setIdUsuario(usuario.getIdUsuario());
+        dto.setNombre(usuario.getNombre());
+        dto.setCorreo(usuario.getCorreo());
+        return dto;
     }
 }
