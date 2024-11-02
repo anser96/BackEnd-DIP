@@ -2,7 +2,10 @@ package com.diplomado.model;
 
 import lombok.Data;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.Date;
+
 
 @Data
 @Entity
@@ -10,10 +13,14 @@ import java.util.Date;
 public class Tarea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idTarea;
-
+    private int idTareas;
     private String descripcion;
-    private String responsable;
-    private Date fechaLimite;
+    private LocalDate fechaEntrega;
+    private LocalDate fechaVerificacion;
+    private String tipoResponsable; // "miembro" o "invitado"
+    private int responsableId; // ID del miembro o invitado responsable
+    private String estado = "Pendiente"; // Estado inicial de la tarea
+    @Transient // Campo transitorio para mostrar detalles del responsable sin relación persistente
+    private Object responsable;
 }
 
