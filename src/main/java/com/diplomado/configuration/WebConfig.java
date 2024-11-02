@@ -77,7 +77,7 @@ public class WebConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5174"); // Cambia esta URL a la de tu frontend
+        configuration.addAllowedOrigin("http://localhost:5173"); // Cambia esta URL a la de tu frontend
         configuration.addAllowedMethod("*"); // Permitir todos los métodos (GET, POST, etc.)
         configuration.addAllowedHeader("*"); // Permitir todos los encabezados
         configuration.setAllowCredentials(true); // Permitir credenciales, si es necesario

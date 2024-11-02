@@ -5,6 +5,8 @@ import com.diplomado.repository.ActaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ActaService {
 
@@ -19,5 +21,9 @@ public class ActaService {
         Acta acta = actaRepository.findById(actaId).orElseThrow();
         acta.setEstado("APROBADA");
         return actaRepository.save(acta);
+    }
+
+    public List<Acta> findAll() {
+        return actaRepository.findAll();
     }
 }
