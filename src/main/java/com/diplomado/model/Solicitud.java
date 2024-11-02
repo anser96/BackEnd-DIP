@@ -26,9 +26,5 @@ public class Solicitud {
     @ManyToOne
     @JoinColumn(name = "SESION_IDSESION")
     private Sesion sesion;
-
-    @ManyToOne
-    @JoinColumn(name = "DESCRIPCION_IDDESCRIPCION")
-    private Descripcion descripcion;
 }
 
