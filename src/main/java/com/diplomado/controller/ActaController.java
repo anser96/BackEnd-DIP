@@ -40,9 +40,15 @@ public class ActaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ActaDTO> obtenerActaPorId(@PathVariable int id) {
+    public ResponseEntity<ApiResponse<ActaDTO>> obtenerActaPorId(@PathVariable int id) {
         return actaService.obtenerActaPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(actaDTO -> {
+                    ApiResponse<ActaDTO> response = new ApiResponse<>("success", "Acta obtenida con éxito", actaDTO);
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    ApiResponse<ActaDTO> response = new ApiResponse<>("error", "Acta no encontrada", null);
+                    return ResponseEntity.status(404).body(response);
+                });
     }
 }
