@@ -3,6 +3,7 @@ package com.diplomado.controller;
 import com.diplomado.model.ApiResponse;
 import com.diplomado.model.JwtResponse;
 import com.diplomado.model.Usuario;
+import com.diplomado.model.dto.UsuarioDTO;
 import com.diplomado.security.JwtTokenProvider;
 import com.diplomado.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,17 +51,20 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<JwtResponse>> authenticateUser(@RequestBody Usuario user) {
-        // Autenticar al usuario con correo y contraseña
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getCorreo(), user.getContrasena()));
 
-        // Generar el token JWT
         String token = tokenProvider.generateToken(authentication.getName());
 
-        // Crear el modelo de respuesta JWT
-        JwtResponse jwtResponse = new JwtResponse(token);
+        Usuario usuarioAutenticado = userService.findByCorreo(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Crear el modelo de respuesta estándar
+        // Convertir Usuario a UsuarioDTO para no exponer la contraseña
+        UsuarioDTO usuarioDTO = userService.convertirAUsuarioDTO(usuarioAutenticado);
+
+        // Crear el modelo de respuesta JWT con el token y el usuarioDTO
+        JwtResponse jwtResponse = new JwtResponse(token, usuarioDTO);
+
         ApiResponse<JwtResponse> response = new ApiResponse<>("success", "Inicio de sesión exitoso", jwtResponse);
 
         return ResponseEntity.ok(response);

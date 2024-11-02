@@ -1,23 +1,32 @@
 package com.diplomado.model;
 
+import com.diplomado.model.dto.UsuarioDTO;
+
 public class JwtResponse {
     private String token; // Token JWT generado
+    private UsuarioDTO usuario; // Información del usuario sin la contraseña
 
-    // Constructor vacío
     public JwtResponse() {
     }
 
-    // Constructor con parámetros
-    public JwtResponse(String token) {
+    public JwtResponse(String token, UsuarioDTO usuario) {
         this.token = token;
+        this.usuario = usuario;
     }
 
-    // Getters y Setters
     public String getToken() {
         return token;
     }
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public UsuarioDTO getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(UsuarioDTO usuario) {
+        this.usuario = usuario;
     }
 }
