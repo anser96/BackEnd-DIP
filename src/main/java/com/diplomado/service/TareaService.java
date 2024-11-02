@@ -72,7 +72,7 @@ public class TareaService {
                     .fechaVerificacion(tarea.getFechaVerificacion())
                     .tipoResponsable(tarea.getTipoResponsable())
                     .responsableId(tarea.getResponsableId())
-                    .responsableNombre(responsableNombre)
+                    .responsable(responsableNombre)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -94,6 +94,28 @@ public class TareaService {
             tareaRepository.save(tarea);
         });
         return tareaOpt;
+    }
+
+    @Autowired
+    private SesionService sesionService; // Si es necesario obtener miembros/invitados por sesión
+
+    public List<Tarea> obtenerTareasPorSesion(int sesionId) {
+        // Obtener IDs de todos los miembros e invitados asociados a esta sesión
+        List<Integer> miembrosIds = sesionService.obtenerMiembrosPorSesion(sesionId).stream()
+                .map(miembro -> miembro.getIdMiembro())
+                .collect(Collectors.toList());
+
+        List<Integer> invitadosIds = sesionService.obtenerInvitadosPorSesion(sesionId).stream()
+                .map(invitado -> invitado.getIdInvitados())
+                .collect(Collectors.toList());
+
+        // Buscar tareas que coincidan con los miembros o invitados de la sesión
+        List<Tarea> tareasParaMiembros = tareaRepository.findByTipoResponsableAndResponsableIdIn("miembro", miembrosIds);
+        List<Tarea> tareasParaInvitados = tareaRepository.findByTipoResponsableAndResponsableIdIn("invitado", invitadosIds);
+
+        // Combinar ambas listas y devolver
+        tareasParaMiembros.addAll(tareasParaInvitados);
+        return tareasParaMiembros;
     }
 }
 

@@ -1,11 +1,13 @@
 package com.diplomado.service;
 
 import com.diplomado.model.Miembro;
+import com.diplomado.model.Sesion;
 import com.diplomado.repository.MiembroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MiembroService {
@@ -26,5 +28,18 @@ public class MiembroService {
 
     public void deleteById(int id){
         miembroRepository.deleteById(id);
+    }
+
+    public Miembro actualizarMiembro(int id, Miembro miembroDetalles) {
+        Optional<Miembro> miembroExistente = miembroRepository.findById(id);
+
+        if (miembroExistente.isPresent()) {
+            Miembro miembro = miembroExistente.get();
+            miembro.setNombre(miembroDetalles.getNombre());
+            miembro.setCargo(miembroDetalles.getCargo());
+            return miembroRepository.save(miembro);
+        } else {
+            throw new RuntimeException("Miembro no encontrado con id: " + id);
+        }
     }
 }

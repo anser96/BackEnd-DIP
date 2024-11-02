@@ -14,7 +14,7 @@ public class Solicitud {
 
     private String dependencia;
     private String asunto;
-    private String desicion;
+    private String descripcion;
     private Date fechaDeSolicitud;
     private String respuesta;
     private String estado;

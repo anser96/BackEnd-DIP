@@ -2,10 +2,7 @@ package com.diplomado.service;
 
 import com.diplomado.configuration.exception.FechaNoValidaException;
 import com.diplomado.model.*;
-import com.diplomado.model.dto.ActaDTO;
-import com.diplomado.model.dto.AsistenciaInvitadoDTO;
-import com.diplomado.model.dto.AsistenciaMiembroDTO;
-import com.diplomado.model.dto.SesionDTO;
+import com.diplomado.model.dto.*;
 import com.diplomado.repository.*;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
@@ -43,6 +40,9 @@ public class SesionService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private TareaRepository tareaRepository;
 
     public Sesion save(Sesion sesion) {
         Optional<Sesion> ultimaSesionOpt = sesionRepository.findTopByOrderByFechaDesc();
@@ -117,32 +117,29 @@ public class SesionService {
         // Obtenemos la asistencia de miembros
         List<AsistenciaMiembroDTO> asistenciaMiembros = asistenciaMiembroRepository.findBySesion(sesion)
                 .stream()
-                .map(am -> {
-                    AsistenciaMiembroDTO amDTO = new AsistenciaMiembroDTO();
-                    amDTO.setIdMiembro(am.getMiembro().getIdMiembro());
-                    amDTO.setNombre(am.getMiembro().getNombre());
-                    amDTO.setCargo(am.getMiembro().getCargo());
-                    amDTO.setEmail(am.getMiembro().getEmail());
-                    amDTO.setEstadoAsistencia(am.getEstadoAsistencia());
-                    return amDTO;
-                })
+                .map(am -> AsistenciaMiembroDTO.builder()
+                        .idMiembro(am.getMiembro().getIdMiembro())
+                        .nombre(am.getMiembro().getNombre())
+                        .cargo(am.getMiembro().getCargo())
+                        .email(am.getMiembro().getEmail())
+                        .estadoAsistencia(am.getEstadoAsistencia())
+                        .build())
                 .collect(Collectors.toList());
         dto.setAsistenciaMiembros(asistenciaMiembros);
 
-        // Obtenemos la asistencia de invitados
+// Obtenemos la asistencia de invitados
         List<AsistenciaInvitadoDTO> asistenciaInvitados = asistenciaInvitadoRepository.findBySesion(sesion)
                 .stream()
-                .map(ai -> {
-                    AsistenciaInvitadoDTO aiDTO = new AsistenciaInvitadoDTO();
-                    aiDTO.setIdInvitado(ai.getInvitado().getIdInvitados());
-                    aiDTO.setNombre(ai.getInvitado().getNombre());
-                    aiDTO.setDependencia(ai.getInvitado().getDependencia());
-                    aiDTO.setEmail(ai.getInvitado().getEmail());
-                    aiDTO.setEstadoAsistencia(ai.getEstadoAsistencia());
-                    return aiDTO;
-                })
+                .map(ai -> AsistenciaInvitadoDTO.builder()
+                        .idInvitado(ai.getInvitado().getIdInvitados())
+                        .nombre(ai.getInvitado().getNombre())
+                        .dependencia(ai.getInvitado().getDependencia())
+                        .email(ai.getInvitado().getEmail())
+                        .estadoAsistencia(ai.getEstadoAsistencia())
+                        .build())
                 .collect(Collectors.toList());
         dto.setAsistenciaInvitados(asistenciaInvitados);
+
 
         // Obtenemos las actas relacionadas con la sesión
         List<ActaDTO> actas = actaRepository.findBySesion(sesion)
@@ -150,10 +147,40 @@ public class SesionService {
                 .map(acta -> ActaDTO.builder()
                         .idActa(acta.getIdActa())
                         .estado(acta.getEstado())
-                        .idSesion(acta.getSesion().getIdSesion()) // Incluyendo el idSesion
+                        .sesionId(acta.getSesion().getIdSesion()) // Incluyendo el idSesion
                         .build())
                 .collect(Collectors.toList());
         dto.setActas(actas);
+
+        // Obtener las tareas asociadas con el responsable, según el tipo de responsable
+        List<TareaDTO> tareas = tareaRepository.findAll().stream()
+                .filter(tarea -> "miembro".equalsIgnoreCase(tarea.getTipoResponsable()) && asistenciaMiembros.stream().anyMatch(m -> m.getIdMiembro() == tarea.getResponsableId())
+                        || "invitado".equalsIgnoreCase(tarea.getTipoResponsable()) && asistenciaInvitados.stream().anyMatch(i -> i.getIdInvitado() == tarea.getResponsableId()))
+                .map(tarea -> {
+                    String responsableNombre = "Desconocido";
+                    if ("miembro".equalsIgnoreCase(tarea.getTipoResponsable())) {
+                        responsableNombre = miembroRepository.findById(tarea.getResponsableId())
+                                .map(Miembro::getNombre)
+                                .orElse("Miembro no encontrado");
+                    } else if ("invitado".equalsIgnoreCase(tarea.getTipoResponsable())) {
+                        responsableNombre = invitadoRepository.findById(tarea.getResponsableId())
+                                .map(Invitado::getNombre)
+                                .orElse("Invitado no encontrado");
+                    }
+                    return TareaDTO.builder()
+                            .idTarea(tarea.getIdTareas())
+                            .descripcion(tarea.getDescripcion())
+                            .estado(tarea.getEstado())
+                            .fechaEntrega(tarea.getFechaEntrega())
+                            .fechaVerificacion(tarea.getFechaVerificacion())
+                            .tipoResponsable(tarea.getTipoResponsable())
+                            .responsableId(tarea.getResponsableId())
+                            .responsable(responsableNombre)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        dto.setTareas(tareas);
 
         return dto;
     }
@@ -280,6 +307,22 @@ public class SesionService {
             return true;
         }
         return false;
+    }
+
+    public List<Miembro> obtenerMiembrosPorSesion(int sesionId) {
+        Sesion sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
+        return sesion.getAsistenciaMiembros().stream()
+                .map(asistencia -> asistencia.getMiembro())
+                .collect(Collectors.toList());
+    }
+
+    public List<Invitado> obtenerInvitadosPorSesion(int sesionId) {
+        Sesion sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
+        return sesion.getAsistenciaInvitados().stream()
+                .map(asistencia -> asistencia.getInvitado())
+                .collect(Collectors.toList());
     }
 }
 

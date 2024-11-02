@@ -25,13 +25,6 @@ public class SolicitudController {
         return solicitudService.responder(solicitudId, respuesta);
     }
 
-    @GetMapping("/pendientes")
-    public List<SolicitudDTO> getSolicitudesPendientes() {
-        List<Solicitud> solicitudes = solicitudService.findByEstado("PENDIENTE");
-        return solicitudes.stream()
-                .map(s -> new SolicitudDTO(s.getIdSolicitud(), s.getDependencia(), s.getAsunto(), s.getEstado(), s.getFechaDeSolicitud(), s.getSolicitante().getNombre()))
-                .collect(Collectors.toList());
-    }
 
     @GetMapping
     public List<Solicitud> getAll(){

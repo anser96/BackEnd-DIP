@@ -38,4 +38,11 @@ public class ActaController {
         ApiResponse<List<ActaDTO>> response = new ApiResponse<>("success", "Lista de actas obtenida exitosamente", actas);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ActaDTO> obtenerActaPorId(@PathVariable int id) {
+        return actaService.obtenerActaPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

@@ -27,5 +27,6 @@ public class SesionDTO {
 
     // Lista de actas relacionadas a la sesión
     private List<ActaDTO> actas;
+    private List<TareaDTO> tareas;
 }
 

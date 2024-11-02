@@ -10,10 +10,10 @@ import java.time.LocalDate;
 public class TareaDTO {
     private int idTarea;
     private String descripcion;
-    private String estado;
     private LocalDate fechaEntrega;
     private LocalDate fechaVerificacion;
     private String tipoResponsable;
     private int responsableId;
-    private String responsableNombre; // Nombre del responsable, sea miembro o invitado
+    private String estado;
+    private Object responsable;
 }
