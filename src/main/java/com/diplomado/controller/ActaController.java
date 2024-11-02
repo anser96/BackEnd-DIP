@@ -2,6 +2,7 @@ package com.diplomado.controller;
 
 import com.diplomado.model.Acta;
 import com.diplomado.model.ApiResponse;
+import com.diplomado.model.dto.ActaDTO;
 import com.diplomado.service.ActaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +33,8 @@ public class ActaController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Acta>>> obtenerActas() {
-        List<Acta> actas = actaService.findAll();
-        ApiResponse<List<Acta>> response = new ApiResponse<>("success", "Lista de actas obtenida exitosamente", actas);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<List<ActaDTO>> obtenerActas() {
+        List<ActaDTO> actas = actaService.listarActas();
+        return ResponseEntity.ok(actas);
     }
 }
