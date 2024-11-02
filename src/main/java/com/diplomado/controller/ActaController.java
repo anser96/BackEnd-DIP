@@ -33,8 +33,9 @@ public class ActaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ActaDTO>> obtenerActas() {
+    public ResponseEntity<ApiResponse<List<ActaDTO>>> obtenerActas() {
         List<ActaDTO> actas = actaService.listarActas();
-        return ResponseEntity.ok(actas);
+        ApiResponse<List<ActaDTO>> response = new ApiResponse<>("success", "Lista de actas obtenida exitosamente", actas);
+        return ResponseEntity.ok(response);
     }
 }
