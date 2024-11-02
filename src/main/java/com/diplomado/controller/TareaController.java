@@ -2,6 +2,7 @@ package com.diplomado.controller;
 
 import com.diplomado.model.ApiResponse;
 import com.diplomado.model.Tarea;
+import com.diplomado.model.dto.TareaDTO;
 import com.diplomado.service.TareaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,9 +30,10 @@ public class TareaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Tarea>> obtenerTareasConResponsables() {
-        List<Tarea> tareas = tareaService.obtenerTareasConResponsables();
-        return ResponseEntity.ok(tareas);
+    public ResponseEntity<ApiResponse<List<TareaDTO>>> obtenerTareasConResponsables() {
+        List<TareaDTO> tareas = tareaService.obtenerTareasConResponsables();
+        ApiResponse<List<TareaDTO>> response = new ApiResponse<>("success", "Tareas obtenidas con éxito", tareas);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/asignar")

@@ -1,6 +1,9 @@
 package com.diplomado.service;
 
+import com.diplomado.model.Invitado;
+import com.diplomado.model.Miembro;
 import com.diplomado.model.Tarea;
+import com.diplomado.model.dto.TareaDTO;
 import com.diplomado.repository.InvitadoRepository;
 import com.diplomado.repository.MiembroRepository;
 import com.diplomado.repository.TareaRepository;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TareaService {
@@ -44,41 +48,52 @@ public class TareaService {
         tareaRepository.deleteById(idTarea);
     }
 
+    public List<TareaDTO> obtenerTareasConResponsables() {
+        return tareaRepository.findAll().stream().map(tarea -> {
+            String responsableNombre = null;
+
+            // Obtener solo el nombre del responsable según el tipo
+            if ("miembro".equalsIgnoreCase(tarea.getTipoResponsable())) {
+                responsableNombre = miembroRepository.findById(tarea.getResponsableId())
+                        .map(Miembro::getNombre)
+                        .orElse("Miembro no encontrado");
+            } else if ("invitado".equalsIgnoreCase(tarea.getTipoResponsable())) {
+                responsableNombre = invitadoRepository.findById(tarea.getResponsableId())
+                        .map(Invitado::getNombre)
+                        .orElse("Invitado no encontrado");
+            }
+
+            // Crear TareaDTO con solo los campos necesarios
+            return TareaDTO.builder()
+                    .idTarea(tarea.getIdTareas())
+                    .descripcion(tarea.getDescripcion())
+                    .estado(tarea.getEstado())
+                    .fechaEntrega(tarea.getFechaEntrega())
+                    .fechaVerificacion(tarea.getFechaVerificacion())
+                    .tipoResponsable(tarea.getTipoResponsable())
+                    .responsableId(tarea.getResponsableId())
+                    .responsableNombre(responsableNombre)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
     public Tarea asignarTarea(String descripcion, String tipoResponsable, int responsableId, LocalDate fechaEntrega, LocalDate fechaVerificacion) {
         Tarea tarea = new Tarea();
         tarea.setDescripcion(descripcion);
-        tarea.setFechaEntrega(fechaEntrega);
-        tarea.setFechaVerificacion(fechaVerificacion);
         tarea.setTipoResponsable(tipoResponsable);
         tarea.setResponsableId(responsableId);
-        tarea.setEstado("Pendiente");
-
+        tarea.setFechaEntrega(fechaEntrega);
+        tarea.setFechaVerificacion(fechaVerificacion);
         return tareaRepository.save(tarea);
     }
 
-    public List<Tarea> obtenerTareasConResponsables() {
-        List<Tarea> tareas = tareaRepository.findAll();
-
-        tareas.forEach(tarea -> {
-            if ("miembro".equalsIgnoreCase(tarea.getTipoResponsable())) {
-                tarea.setResponsable(miembroRepository.findById(tarea.getResponsableId()).orElse(null));
-            } else if ("invitado".equalsIgnoreCase(tarea.getTipoResponsable())) {
-                tarea.setResponsable(invitadoRepository.findById(tarea.getResponsableId()).orElse(null));
-            }
-        });
-
-        return tareas;
-    }
-
-    public Optional<Tarea> actualizarEstado(int tareaId, String nuevoEstado) {
-        Optional<Tarea> tareaOpt = tareaRepository.findById(tareaId);
-        if (tareaOpt.isPresent()) {
-            Tarea tarea = tareaOpt.get();
-            tarea.setEstado(nuevoEstado);
+    public Optional<Tarea> actualizarEstado(int id, String estado) {
+        Optional<Tarea> tareaOpt = tareaRepository.findById(id);
+        tareaOpt.ifPresent(tarea -> {
+            tarea.setEstado(estado);
             tareaRepository.save(tarea);
-            return Optional.of(tarea);
-        }
-        return Optional.empty();
+        });
+        return tareaOpt;
     }
 }
 
