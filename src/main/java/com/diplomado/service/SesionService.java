@@ -260,5 +260,27 @@ public class SesionService {
     public void deleteSesion(int id) {
         sesionRepository.deleteById(id);
     }
+
+    public boolean actualizarEstadoAsistenciaMiembro(int sesionId, int miembroId, String nuevoEstado) {
+        AsistenciaMiembroId asistenciaId = new AsistenciaMiembroId(sesionId, miembroId);
+        Optional<AsistenciaMiembro> asistencia = asistenciaMiembroRepository.findById(asistenciaId);
+        if (asistencia.isPresent()) {
+            asistencia.get().setEstadoAsistencia(nuevoEstado);
+            asistenciaMiembroRepository.save(asistencia.get());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean actualizarEstadoAsistenciaInvitado(int sesionId, int invitadoId, String nuevoEstado) {
+        AsistenciaInvitadoId asistenciaId = new AsistenciaInvitadoId(sesionId, invitadoId);
+        Optional<AsistenciaInvitado> asistencia = asistenciaInvitadoRepository.findById(asistenciaId);
+        if (asistencia.isPresent()) {
+            asistencia.get().setEstadoAsistencia(nuevoEstado);
+            asistenciaInvitadoRepository.save(asistencia.get());
+            return true;
+        }
+        return false;
+    }
 }
 
