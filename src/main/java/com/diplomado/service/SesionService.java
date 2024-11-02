@@ -147,12 +147,11 @@ public class SesionService {
         // Obtenemos las actas relacionadas con la sesión
         List<ActaDTO> actas = actaRepository.findBySesion(sesion)
                 .stream()
-                .map(acta -> {
-                    ActaDTO actaDTO = new ActaDTO();
-                    actaDTO.setIdActa(acta.getIdActa());
-                    actaDTO.setEstado(acta.getEstado());
-                    return actaDTO;
-                })
+                .map(acta -> ActaDTO.builder()
+                        .idActa(acta.getIdActa())
+                        .estado(acta.getEstado())
+                        .idSesion(acta.getSesion().getIdSesion()) // Incluyendo el idSesion
+                        .build())
                 .collect(Collectors.toList());
         dto.setActas(actas);
 
