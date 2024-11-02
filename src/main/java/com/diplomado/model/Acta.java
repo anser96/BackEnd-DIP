@@ -25,6 +25,7 @@ public class Acta {
     @JoinColumn(name = "SESION_IDSESION")
     @JsonBackReference // Esta es la referencia inversa a Sesion
     private Sesion sesion;
+
 }
 
 
