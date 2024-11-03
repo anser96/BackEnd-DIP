@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 public class ActaDTO {
     private int idActa;
-    private int numeroActa;
+    private String numeroActa;
     private String estado;
     private int sesionId;
 

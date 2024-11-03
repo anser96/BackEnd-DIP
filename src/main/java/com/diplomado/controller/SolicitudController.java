@@ -17,7 +17,7 @@ public class SolicitudController {
 
     @PostMapping
     public Solicitud crearSolicitud(@RequestBody Solicitud solicitud) {
-        return solicitudService.save(solicitud);
+        return solicitudService.crearSolicitud(solicitud);
     }
 
     @PostMapping("/{solicitudId}/responder")

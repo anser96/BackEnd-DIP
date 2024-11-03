@@ -11,5 +11,7 @@ import java.util.List;
 @Repository
 public interface ActaRepository extends JpaRepository<Acta, Integer> {
     List<Acta> findBySesion(Sesion sesion);
+
+    boolean existsByNumeroActa(String numeroActa);
 }
 

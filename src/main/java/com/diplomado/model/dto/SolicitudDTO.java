@@ -15,7 +15,10 @@ public class SolicitudDTO {
     private Date fechaDeSolicitud;
     private String respuesta;
     private String estado;
-    private String solicitanteNombre;
+    // Información del solicitante
+    private String tipoSolicitante;
+    private int idSolicitante;
+    private String nombreSolicitante;
 
     // Getters y Setters (puedes generarlos con Lombok si prefieres)
 }

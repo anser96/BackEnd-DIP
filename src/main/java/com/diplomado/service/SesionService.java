@@ -6,6 +6,7 @@ import com.diplomado.model.dto.*;
 import com.diplomado.repository.*;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,9 @@ public class SesionService {
     @Autowired
     private TareaRepository tareaRepository;
 
+    @Autowired
+    private SolicitudRepository solicitudRepository;
+
     public Sesion save(Sesion sesion) {
         Optional<Sesion> ultimaSesionOpt = sesionRepository.findTopByOrderByFechaDesc();
 
@@ -61,7 +65,17 @@ public class SesionService {
             throw new IllegalArgumentException("Presidente y Secretario son campos obligatorios.");
         }
 
-        return sesionRepository.save(sesion);
+        Sesion nuevaSesion = sesionRepository.save(sesion);
+        // Crear el acta y asociarla a la sesión
+        Acta acta = new Acta();
+        acta.setSesion(nuevaSesion); // Asignar la sesión al acta
+        acta.setEstado("Pendiente"); // Estado inicial del acta
+        acta.setNumeroActa(generarNumeroActa()); // Generar número de acta alfanumérico
+
+        // Guardar el acta en la base de datos
+        actaRepository.save(acta);
+
+        return nuevaSesion;
     }
 
     public Sesion findById(int idSesion) {
@@ -77,6 +91,16 @@ public class SesionService {
         } else {
             return null; // Sesión no encontrada
         }
+    }
+
+    private String generarNumeroActa() {
+        String numeroActa;
+
+        do {
+            numeroActa = RandomStringUtils.randomAlphanumeric(3).toUpperCase();
+        } while (actaRepository.existsByNumeroActa(numeroActa)); // Asegurarse de que el número es único
+
+        return numeroActa;
     }
 
     public List<SesionDTO> getSesiones() {
@@ -181,6 +205,24 @@ public class SesionService {
                 .collect(Collectors.toList());
 
         dto.setTareas(tareas);
+
+        // Solicitudes asociadas a la sesión
+        List<SolicitudDTO> solicitudes = solicitudRepository.findBySesion(sesion)
+                .stream()
+                .map(solicitud -> SolicitudDTO.builder()
+                        .idSolicitud(solicitud.getIdSolicitud())
+                        .dependencia(solicitud.getDependencia())
+                        .asunto(solicitud.getAsunto())
+                        .descripcion(solicitud.getDescripcion())
+                        .fechaDeSolicitud(solicitud.getFechaDeSolicitud())
+                        .respuesta(solicitud.getRespuesta())
+                        .estado(solicitud.getEstado())
+                        .tipoSolicitante(solicitud.getTipoSolicitante())
+                        .idSolicitante(solicitud.getIdSolicitante())
+                        .nombreSolicitante(solicitud.getNombreSolicitante())
+                        .build())
+                .collect(Collectors.toList());
+        dto.setSolicitudes(solicitudes);
 
         return dto;
     }

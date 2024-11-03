@@ -16,7 +16,7 @@ public class Acta {
     private int idActa;
 
     @Column(name = "NUMERO_ACTA")  // Asegúrate de que exista esta columna en la tabla "acta"
-    private int numeroActa;
+    private String numeroActa;
 
     private String estado;
 
