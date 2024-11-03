@@ -26,7 +26,6 @@ public class SesionDTO {
     private List<AsistenciaInvitadoDTO> asistenciaInvitados;
 
     // Lista de actas relacionadas a la sesión
-    private List<ActaDTO> actas;
     private List<TareaDTO> tareas;
 
     private List<SolicitudDTO> solicitudes;

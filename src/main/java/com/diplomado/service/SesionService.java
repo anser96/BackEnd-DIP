@@ -165,16 +165,6 @@ public class SesionService {
         dto.setAsistenciaInvitados(asistenciaInvitados);
 
 
-        // Obtenemos las actas relacionadas con la sesión
-        List<ActaDTO> actas = actaRepository.findBySesion(sesion)
-                .stream()
-                .map(acta -> ActaDTO.builder()
-                        .idActa(acta.getIdActa())
-                        .estado(acta.getEstado())
-                        .sesionId(acta.getSesion().getIdSesion()) // Incluyendo el idSesion
-                        .build())
-                .collect(Collectors.toList());
-        dto.setActas(actas);
 
         // Obtener las tareas asociadas con el responsable, según el tipo de responsable
         List<TareaDTO> tareas = tareaRepository.findAll().stream()
