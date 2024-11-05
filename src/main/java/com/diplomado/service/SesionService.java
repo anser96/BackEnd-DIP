@@ -69,7 +69,7 @@ public class SesionService {
         // Crear el acta y asociarla a la sesión
         Acta acta = new Acta();
         acta.setSesion(nuevaSesion); // Asignar la sesión al acta
-        acta.setEstado("Pendiente"); // Estado inicial del acta
+        acta.setEstado("PENDIENTE"); // Estado inicial del acta
         acta.setNumeroActa(generarNumeroActa()); // Generar número de acta alfanumérico
 
         // Guardar el acta en la base de datos
