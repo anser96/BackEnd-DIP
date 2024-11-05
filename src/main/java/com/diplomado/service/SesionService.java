@@ -226,13 +226,22 @@ public class SesionService {
         Sesion sesion = sesionRepository.findById(sesionId).orElseThrow();
 
         for (Invitado invitado : invitados) {
-            Invitado existingInvitado = invitadoRepository.findById(invitado.getIdInvitados()).orElse(invitado);
-            invitadoRepository.save(existingInvitado);
+            // Buscar el invitado por email en lugar de ID
+            Optional<Invitado> optionalInvitado = invitadoRepository.findByEmail(invitado.getEmail());
+            Invitado existingInvitado;
 
-            // Crea el ID compuesto
+            if (optionalInvitado.isPresent()) {
+                // Si el invitado ya existe, utilizar el registro existente
+                existingInvitado = optionalInvitado.get();
+            } else {
+                // Si el invitado no existe, guardar el nuevo invitado
+                existingInvitado = invitadoRepository.save(invitado);
+            }
+
+            // Crear el ID compuesto para AsistenciaInvitado
             AsistenciaInvitadoId asistenciaInvitadoId = new AsistenciaInvitadoId(sesionId, existingInvitado.getIdInvitados());
 
-            // Crea la instancia de AsistenciaInvitado
+            // Crear la instancia de AsistenciaInvitado
             AsistenciaInvitado asistenciaInvitado = new AsistenciaInvitado();
             asistenciaInvitado.setId(asistenciaInvitadoId);
             asistenciaInvitado.setSesion(sesion);
@@ -240,6 +249,7 @@ public class SesionService {
             asistenciaInvitado.setEstadoAsistencia("PENDIENTE");
 
             asistenciaInvitadoRepository.save(asistenciaInvitado);
+
             // Enviar notificación por correo
             String subject = "Invitación a la sesión";
             String text = "Usted ha sido agregado a una sesión. Detalles de la sesión: " + sesion.getLugar() + ", Fecha: " + sesion.getFecha();
@@ -250,26 +260,39 @@ public class SesionService {
                         text
                 );
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Error al enviar la notificación al invitado", e);
             }
         }
     }
 
 
+
+
+
+
     @Transactional
     public void citarMiembros(int sesionId, List<Miembro> miembros) {
         // Buscamos la sesión, si no se encuentra lanzamos una excepción
-        Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+        Sesion sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
 
         for (Miembro miembro : miembros) {
-            // Verificamos si el miembro ya existe en la BD, si no existe lo creamos
-            Miembro existingMiembro = miembroRepository.findById(miembro.getIdMiembro()).orElse(miembro);
-            miembroRepository.save(existingMiembro);  // Guardamos el miembro en caso de que no exista
+            // Verificar si el miembro ya existe en la base de datos por email
+            Optional<Miembro> optionalMiembro = miembroRepository.findByEmail(miembro.getEmail());
+            Miembro existingMiembro;
 
-            // Creamos la clave compuesta (sesionId, miembroId)
+            if (optionalMiembro.isPresent()) {
+                // Si el miembro ya existe, utilizar el miembro encontrado
+                existingMiembro = optionalMiembro.get();
+            } else {
+                // Si no existe, se guarda el nuevo miembro en la tabla
+                existingMiembro = miembroRepository.save(miembro);
+            }
+
+            // Crear la clave compuesta (sesionId, miembroId)
             AsistenciaMiembroId asistenciaMiembroId = new AsistenciaMiembroId(sesionId, existingMiembro.getIdMiembro());
 
-            // Creamos la relación de asistencia
+            // Crear la relación de asistencia
             AsistenciaMiembro asistenciaMiembro = new AsistenciaMiembro();
             asistenciaMiembro.setId(asistenciaMiembroId);
             asistenciaMiembro.setSesion(sesion);
@@ -278,6 +301,7 @@ public class SesionService {
 
             // Guardamos la relación de asistencia
             asistenciaMiembroRepository.save(asistenciaMiembro);
+
             // Enviar notificación por correo
             String subject = "Invitación a la sesión";
             String text = "Usted ha sido agregado a una sesión. Detalles de la sesión: " + sesion.getLugar() + ", Fecha: " + sesion.getFecha();
@@ -288,10 +312,11 @@ public class SesionService {
                         text
                 );
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Error al enviar la notificación al miembro", e);
             }
         }
     }
+
 
 
 
