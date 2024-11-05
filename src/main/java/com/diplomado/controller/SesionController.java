@@ -4,6 +4,7 @@ import com.diplomado.model.ApiResponse;
 import com.diplomado.model.Invitado;
 import com.diplomado.model.Miembro;
 import com.diplomado.model.Sesion;
+import com.diplomado.model.dto.AsistenciaDTO;
 import com.diplomado.model.dto.SesionDTO;
 import com.diplomado.service.SesionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,5 +131,16 @@ public class SesionController {
     public ResponseEntity<ApiResponse<Void>> deleteSesion(@PathVariable int id) {
         sesionService.deleteSesion(id);
         return ResponseEntity.ok(new ApiResponse<>("success", "Sesión eliminada con éxito", null));
+    }
+
+    @PostMapping("/{sesionId}/verificar-quorum")
+    public ResponseEntity<ApiResponse<Void>> verificarQuorum(
+            @PathVariable int sesionId,
+            @RequestBody List<AsistenciaDTO> asistencias) {
+
+        // Llamamos al servicio para verificar el quorum y actualizar los estados de asistencia
+        sesionService.verificarQuorum(sesionId, asistencias);
+
+        return ResponseEntity.ok(new ApiResponse<>("success", "Quorum Verificado!", null));
     }
 }
