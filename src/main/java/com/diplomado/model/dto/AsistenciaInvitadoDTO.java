@@ -11,4 +11,5 @@ public class AsistenciaInvitadoDTO {
     private String dependencia;
     private String email;
     private String estadoAsistencia;
+    private String excusa;
 }

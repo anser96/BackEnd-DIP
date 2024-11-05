@@ -147,6 +147,7 @@ public class SesionService {
                         .cargo(am.getMiembro().getCargo())
                         .email(am.getMiembro().getEmail())
                         .estadoAsistencia(am.getEstadoAsistencia())
+                        .excusa(am.getExcusa())
                         .build())
                 .collect(Collectors.toList());
         dto.setAsistenciaMiembros(asistenciaMiembros);
@@ -160,6 +161,7 @@ public class SesionService {
                         .dependencia(ai.getInvitado().getDependencia())
                         .email(ai.getInvitado().getEmail())
                         .estadoAsistencia(ai.getEstadoAsistencia())
+                        .excusa(ai.getExcusa())
                         .build())
                 .collect(Collectors.toList());
         dto.setAsistenciaInvitados(asistenciaInvitados);
@@ -339,27 +341,30 @@ public class SesionService {
         Sesion sesion = sesionRepository.findById(sesionId).orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
 
         for (AsistenciaDTO asistenciaDTO : asistencias) {
-            // Si es un miembro
             if ("miembro".equalsIgnoreCase(asistenciaDTO.getTipo())) {
                 AsistenciaMiembroId asistenciaMiembroId = new AsistenciaMiembroId(sesionId, asistenciaDTO.getIdPersona());
                 AsistenciaMiembro asistenciaMiembro = asistenciaMiembroRepository.findById(asistenciaMiembroId)
                         .orElseThrow(() -> new RuntimeException("Asistencia de miembro no encontrada"));
 
                 asistenciaMiembro.setEstadoAsistencia(asistenciaDTO.getEstadoAsistencia());
+                if ("EXCUSA".equalsIgnoreCase(asistenciaDTO.getEstadoAsistencia())) {
+                    asistenciaMiembro.setExcusa(asistenciaDTO.getExcusa());
+                }
                 asistenciaMiembroRepository.save(asistenciaMiembro);
-            }
-
-            // Si es un invitado
-            else if ("invitado".equalsIgnoreCase(asistenciaDTO.getTipo())) {
+            } else if ("invitado".equalsIgnoreCase(asistenciaDTO.getTipo())) {
                 AsistenciaInvitadoId asistenciaInvitadoId = new AsistenciaInvitadoId(sesionId, asistenciaDTO.getIdPersona());
                 AsistenciaInvitado asistenciaInvitado = asistenciaInvitadoRepository.findById(asistenciaInvitadoId)
                         .orElseThrow(() -> new RuntimeException("Asistencia de invitado no encontrada"));
 
                 asistenciaInvitado.setEstadoAsistencia(asistenciaDTO.getEstadoAsistencia());
+                if ("EXCUSA".equalsIgnoreCase(asistenciaDTO.getEstadoAsistencia())) {
+                    asistenciaInvitado.setExcusa(asistenciaDTO.getExcusa());
+                }
                 asistenciaInvitadoRepository.save(asistenciaInvitado);
             }
         }
     }
+
 
 
     public void deleteSesion(int id) {

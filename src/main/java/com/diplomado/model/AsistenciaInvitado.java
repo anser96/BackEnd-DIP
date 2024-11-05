@@ -24,6 +24,8 @@ public class AsistenciaInvitado {
     private Invitado invitado;
 
     private String estadoAsistencia;
+
+    private String excusa;
 }
 
 

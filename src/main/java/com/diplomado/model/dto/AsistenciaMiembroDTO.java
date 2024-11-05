@@ -11,4 +11,5 @@ public class AsistenciaMiembroDTO {
     private String cargo;
     private String email;
     private String estadoAsistencia;
+    private String excusa;
 }

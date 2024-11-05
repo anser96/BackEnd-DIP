@@ -13,4 +13,5 @@ public class AsistenciaDTO {
     private int idPersona;           // ID del miembro o invitado
     private String tipo;             // Tipo de persona ("miembro" o "invitado")
     private String estadoAsistencia; // Estado de asistencia ("ASISTIÓ", "NO ASISTIÓ", "EXCUSA")
+    private String excusa;
 }
