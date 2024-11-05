@@ -5,6 +5,7 @@ import com.diplomado.model.ApiResponse;
 import com.diplomado.model.dto.ActaDTO;
 import com.diplomado.service.ActaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +28,14 @@ public class ActaController {
 
     @PostMapping("/{actaId}/aprobar")
     public ResponseEntity<ApiResponse<Acta>> aprobarActa(@PathVariable int actaId) {
-        Acta actaAprobada = actaService.aprobar(actaId);
-        ApiResponse<Acta> response = new ApiResponse<>("success", "Acta aprobada exitosamente", actaAprobada);
-        return ResponseEntity.ok(response);
+        try {
+            Acta actaAprobada = actaService.aprobar(actaId);
+            ApiResponse<Acta> response = new ApiResponse<>("success", "Acta aprobada exitosamente", actaAprobada);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            ApiResponse<Acta> errorResponse = new ApiResponse<>("error", e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
     @GetMapping

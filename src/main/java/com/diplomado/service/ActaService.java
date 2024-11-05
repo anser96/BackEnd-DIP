@@ -41,7 +41,19 @@ public class ActaService {
     }
 
     public Acta aprobar(int actaId) {
-        Acta acta = actaRepository.findById(actaId).orElseThrow();
+        // Consulta el acta actual que se quiere aprobar
+        Acta acta = actaRepository.findById(actaId).orElseThrow(() -> new RuntimeException("Acta no encontrada"));
+
+        // Verifica si existe un acta anterior
+        int idActaAnterior = actaId - 1;
+        Optional<Acta> actaAnteriorOpt = actaRepository.findById(idActaAnterior);
+
+        // Si existe el acta anterior, se verifica si está aprobada
+        if (actaAnteriorOpt.isPresent() && !"APROBADA".equals(actaAnteriorOpt.get().getEstado())) {
+            throw new RuntimeException("Debe aprobarse el acta anterior antes de aprobar esta.");
+        }
+
+        // Cambiar el estado del acta actual a "APROBADA"
         acta.setEstado("APROBADA");
         return actaRepository.save(acta);
     }
