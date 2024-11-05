@@ -1,4 +1,5 @@
 package com.diplomado.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,6 +15,8 @@ public class Miembro {
     private String nombre;
     private String cargo;
     private String email;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "miembro")
     private List<AsistenciaMiembro> asistenciaMiembros;
 }

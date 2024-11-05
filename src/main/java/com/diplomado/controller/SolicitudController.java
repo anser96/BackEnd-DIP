@@ -27,7 +27,7 @@ public class SolicitudController {
 
 
     @GetMapping
-    public List<Solicitud> getAll(){
+    public List<SolicitudDTO> getAll(){
         return solicitudService.findAll();
     }
 }

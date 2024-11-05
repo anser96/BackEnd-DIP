@@ -2,11 +2,14 @@ package com.diplomado.service;
 
 import com.diplomado.model.Invitado;
 import com.diplomado.model.Miembro;
+import com.diplomado.model.dto.InvitadoDTO;
+import com.diplomado.model.dto.MiembroDTO;
 import com.diplomado.repository.InvitadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class InvitadoService {
@@ -14,8 +17,15 @@ public class InvitadoService {
     @Autowired
     private InvitadoRepository invitadoRepository;
 
-    public List<Invitado> findAllInitados(){
-        return invitadoRepository.findAll();
+    public List<InvitadoDTO> findAllInitados() {
+        return invitadoRepository.findAll().stream()
+                .map(invitado -> InvitadoDTO.builder()
+                        .idInvitado(invitado.getIdInvitados())
+                        .nombre(invitado.getNombre())
+                        .dependencia(invitado.getDependencia())
+                        .email(invitado.getEmail())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public Invitado findById(int id){

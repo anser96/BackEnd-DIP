@@ -1,6 +1,7 @@
 package com.diplomado.controller;
 
 import com.diplomado.model.Miembro;
+import com.diplomado.model.dto.MiembroDTO;
 import com.diplomado.service.MiembroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ public class MiembroController {
     private MiembroService miembroService;
 
     @GetMapping
-    public List<Miembro> getAllMiembros(){
+    public List<MiembroDTO> getAllMiembros(){
         return miembroService.findAllMiembros();
     }
 

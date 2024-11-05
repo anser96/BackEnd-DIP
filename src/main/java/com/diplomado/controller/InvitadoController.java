@@ -3,6 +3,7 @@ package com.diplomado.controller;
 
 import com.diplomado.model.Descripcion;
 import com.diplomado.model.Invitado;
+import com.diplomado.model.dto.InvitadoDTO;
 import com.diplomado.service.InvitadoService;
 import jakarta.persistence.Access;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class InvitadoController {
 
     // Obtener todas las descripciones
     @GetMapping
-    public List<Invitado> obtenerInvitados() {
+    public List<InvitadoDTO> obtenerInvitados() {
         return invitadoService.findAllInitados();
     }
 

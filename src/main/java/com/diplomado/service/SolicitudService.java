@@ -1,7 +1,7 @@
 package com.diplomado.service;
 
 import com.diplomado.model.*;
-import com.diplomado.model.dto.SesionDTO;
+import com.diplomado.model.dto.SolicitudDTO;
 import com.diplomado.repository.InvitadoRepository;
 import com.diplomado.repository.MiembroRepository;
 import com.diplomado.repository.SolicitudRepository;
@@ -73,8 +73,27 @@ public class SolicitudService {
         return solicitudRepository.findByEstado(estado);
     }
 
-    public  List<Solicitud> findAll(){
-        return solicitudRepository.findAll();
+    public List<SolicitudDTO> findAll() {
+        return solicitudRepository.findAll().stream()
+                .map(solicitud -> {
+                    int idSolicitante = solicitud.getIdSolicitante();
+                    String tipoSolicitante = solicitud.getTipoSolicitante();
+                    String nombreSolicitante = obtenerNombreSolicitante(tipoSolicitante, idSolicitante);
+
+                    return SolicitudDTO.builder()
+                            .idSolicitud(solicitud.getIdSolicitud())
+                            .dependencia(solicitud.getDependencia())
+                            .asunto(solicitud.getAsunto())
+                            .descripcion(solicitud.getDescripcion())
+                            .fechaDeSolicitud(solicitud.getFechaDeSolicitud())
+                            .estado(solicitud.getEstado())
+                            .respuesta(solicitud.getRespuesta())
+                            .idSolicitante(idSolicitante)
+                            .nombreSolicitante(nombreSolicitante)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
+
 }
 
