@@ -1,5 +1,6 @@
 package com.diplomado.controller;
 
+import com.diplomado.model.ApiResponse;
 import com.diplomado.model.Solicitud;
 import com.diplomado.model.dto.SolicitudDTO;
 import com.diplomado.service.SolicitudService;
@@ -43,6 +44,12 @@ public class SolicitudController {
     public ResponseEntity<SolicitudDTO> editarSolicitud(@PathVariable int id, @RequestBody SolicitudDTO solicitudDTO) {
         SolicitudDTO solicitudActualizada = solicitudService.editarSolicitud(id, solicitudDTO);
         return ResponseEntity.ok(solicitudActualizada);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteSolicitud(@PathVariable int id){
+         solicitudService.delete(id);
+        return ResponseEntity.ok(new ApiResponse<>("success", "Solicitud eliminada con éxito", null));
     }
 }
 

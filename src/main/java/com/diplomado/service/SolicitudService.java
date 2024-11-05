@@ -170,5 +170,10 @@ public class SolicitudService {
                 .build();
     }
 
+
+    public void delete(int id){
+        solicitudRepository.deleteById(id);
+    }
+
 }
 
