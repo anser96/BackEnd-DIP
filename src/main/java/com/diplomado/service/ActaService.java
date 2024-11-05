@@ -53,6 +53,7 @@ public class ActaService {
                         .idActa(acta.getIdActa())
                         .estado(acta.getEstado())
                         .sesionId(acta.getSesion().getIdSesion()) // Incluyendo el idSesion
+                        .numeroActa(acta.getNumeroActa())
                         .build())
                 .collect(Collectors.toList());
     }
