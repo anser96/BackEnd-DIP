@@ -55,6 +55,25 @@ public class SolicitudService {
         }
     }
 
+    private int obtenerIdSolicitante(String tipoSolicitante, int solicitanteId) {
+        switch (tipoSolicitante.toLowerCase()) {
+            case "miembro":
+                return miembroRepository.findById(solicitanteId)
+                        .map(Miembro::getIdMiembro)
+                        .orElseThrow(() -> new IllegalArgumentException("El ID de miembro no existe: " + solicitanteId));
+            case "invitado":
+                return invitadoRepository.findById(solicitanteId)
+                        .map(Invitado::getIdInvitados)
+                        .orElseThrow(() -> new IllegalArgumentException("El ID de invitado no existe: " + solicitanteId));
+            case "usuario":
+                return usuarioRepository.findById(solicitanteId)
+                        .map(Usuario::getIdUsuario)
+                        .orElseThrow(() -> new IllegalArgumentException("El ID de usuario no existe: " + solicitanteId));
+            default:
+                throw new IllegalArgumentException("Tipo de solicitante no válido: " + tipoSolicitante);
+        }
+    }
+
     public Solicitud findById(int idSolicitud) {
         return solicitudRepository.findById(idSolicitud).orElseThrow();
     }
@@ -93,6 +112,62 @@ public class SolicitudService {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    public SolicitudDTO findSolicitudById(int idSolicitud) {
+        Solicitud solicitud = solicitudRepository.findById(idSolicitud)
+                .orElseThrow(() -> new IllegalArgumentException("La solicitud con ID " + idSolicitud + " no existe"));
+
+        // Obtenemos el nombre y el ID del solicitante basado en el tipo
+        String nombreSolicitante = obtenerNombreSolicitante(solicitud.getTipoSolicitante(), solicitud.getIdSolicitante());
+        int idSolicitante = obtenerIdSolicitante(solicitud.getTipoSolicitante(), solicitud.getIdSolicitante());
+
+        // Convertimos la solicitud a SolicitudDTO
+        return SolicitudDTO.builder()
+                .idSolicitud(solicitud.getIdSolicitud())
+                .dependencia(solicitud.getDependencia())
+                .asunto(solicitud.getAsunto())
+                .descripcion(solicitud.getDescripcion())
+                .fechaDeSolicitud(solicitud.getFechaDeSolicitud())
+                .estado(solicitud.getEstado())
+                .respuesta(solicitud.getRespuesta())
+                .tipoSolicitante(solicitud.getTipoSolicitante())
+                .idSolicitante(idSolicitante)
+                .nombreSolicitante(nombreSolicitante)
+                .build();
+    }
+
+    public SolicitudDTO editarSolicitud(int idSolicitud, SolicitudDTO solicitudDTO) {
+        Solicitud solicitud = solicitudRepository.findById(idSolicitud)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada con ID: " + idSolicitud));
+
+
+        // Obtenemos el nombre y el ID del solicitante basado en el tipo
+        String nombreSolicitante = obtenerNombreSolicitante(solicitud.getTipoSolicitante(), solicitud.getIdSolicitante());
+        int idSolicitante = obtenerIdSolicitante(solicitud.getTipoSolicitante(), solicitud.getIdSolicitante());
+
+        // Actualizamos solo los campos necesarios
+        solicitud.setDependencia(solicitudDTO.getDependencia());
+        solicitud.setAsunto(solicitudDTO.getAsunto());
+        solicitud.setDescripcion(solicitudDTO.getDescripcion());
+        solicitud.setEstado(solicitudDTO.getEstado());
+        solicitud.setRespuesta(solicitudDTO.getRespuesta());
+
+        Solicitud solicitudActualizada = solicitudRepository.save(solicitud);
+
+        // Convertimos a DTO y devolvemos
+        return SolicitudDTO.builder()
+                .idSolicitud(solicitudActualizada.getIdSolicitud())
+                .dependencia(solicitudActualizada.getDependencia())
+                .asunto(solicitudActualizada.getAsunto())
+                .descripcion(solicitudActualizada.getDescripcion())
+                .fechaDeSolicitud(solicitudActualizada.getFechaDeSolicitud())
+                .estado(solicitudActualizada.getEstado())
+                .tipoSolicitante(solicitudActualizada.getTipoSolicitante())
+                .respuesta(solicitudActualizada.getRespuesta())
+                .nombreSolicitante(nombreSolicitante)
+                .idSolicitante(idSolicitante)
+                .build();
     }
 
 }

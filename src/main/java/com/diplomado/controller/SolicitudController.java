@@ -4,6 +4,7 @@ import com.diplomado.model.Solicitud;
 import com.diplomado.model.dto.SolicitudDTO;
 import com.diplomado.service.SolicitudService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,19 @@ public class SolicitudController {
     @GetMapping
     public List<SolicitudDTO> getAll(){
         return solicitudService.findAll();
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SolicitudDTO> obtenerSolicitudPorId(@PathVariable int id) {
+        SolicitudDTO solicitudDTO = solicitudService.findSolicitudById(id);
+        return ResponseEntity.ok(solicitudDTO);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SolicitudDTO> editarSolicitud(@PathVariable int id, @RequestBody SolicitudDTO solicitudDTO) {
+        SolicitudDTO solicitudActualizada = solicitudService.editarSolicitud(id, solicitudDTO);
+        return ResponseEntity.ok(solicitudActualizada);
     }
 }
 
