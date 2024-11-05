@@ -216,6 +216,14 @@ public class SesionService {
                 .collect(Collectors.toList());
         dto.setSolicitudes(solicitudes);
 
+        List<ActaDTO> actas = actaRepository.findBySesion(sesion)
+                .stream()
+                .map(acta -> ActaDTO.builder()
+                        .estado(acta.getEstado())
+                        .build())
+                .collect(Collectors.toList());
+        dto.setActaDTO(actas);
+
         return dto;
     }
 

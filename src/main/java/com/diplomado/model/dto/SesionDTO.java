@@ -29,5 +29,7 @@ public class SesionDTO {
     private List<TareaDTO> tareas;
 
     private List<SolicitudDTO> solicitudes;
+
+    private List<ActaDTO> actaDTO;
 }
 
