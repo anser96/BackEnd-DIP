@@ -117,5 +117,31 @@ public class TareaService {
         tareasParaMiembros.addAll(tareasParaInvitados);
         return tareasParaMiembros;
     }
+
+    public Tarea asignarTareaExistente(int tareaId, int responsableId, String tipoResponsable) {
+        // Buscar la tarea por ID
+        Tarea tarea = tareaRepository.findById(tareaId)
+                .orElseThrow(() -> new RuntimeException("Tarea no encontrada con ID: " + tareaId));
+
+        // Asignar el responsable basado en el tipo
+        if ("miembro".equalsIgnoreCase(tipoResponsable)) {
+            Miembro miembro = miembroRepository.findById(responsableId)
+                    .orElseThrow(() -> new RuntimeException("Miembro no encontrado con ID: " + responsableId));
+            tarea.setTipoResponsable("miembro");
+            tarea.setResponsableId(miembro.getIdMiembro());
+            tarea.setResponsable(miembro); // Asigna el objeto completo para detalles en el DTO
+        } else if ("invitado".equalsIgnoreCase(tipoResponsable)) {
+            Invitado invitado = invitadoRepository.findById(responsableId)
+                    .orElseThrow(() -> new RuntimeException("Invitado no encontrado con ID: " + responsableId));
+            tarea.setTipoResponsable("invitado");
+            tarea.setResponsableId(invitado.getIdInvitados());
+            tarea.setResponsable(invitado); // Asigna el objeto completo para detalles en el DTO
+        } else {
+            throw new IllegalArgumentException("Tipo de responsable no válido: " + tipoResponsable);
+        }
+
+        // Guardar la tarea actualizada en la base de datos
+        return tareaRepository.save(tarea);
+    }
 }
 

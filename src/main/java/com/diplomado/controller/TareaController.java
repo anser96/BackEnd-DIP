@@ -57,4 +57,16 @@ public class TareaController {
         return tareaOpt.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/{tareaId}/asignar")
+    public ResponseEntity<ApiResponse<Tarea>> asignarTarea(
+            @PathVariable int tareaId,
+            @RequestParam int responsableId,
+            @RequestParam String tipoResponsable) {
+
+        Tarea tareaAsignada = tareaService.asignarTareaExistente(tareaId, responsableId, tipoResponsable);
+
+        ApiResponse<Tarea> response = new ApiResponse<>("success", "Tarea asignada exitosamente", tareaAsignada);
+        return ResponseEntity.ok(response);
+    }
 }
