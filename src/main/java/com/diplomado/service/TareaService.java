@@ -143,5 +143,9 @@ public class TareaService {
         // Guardar la tarea actualizada en la base de datos
         return tareaRepository.save(tarea);
     }
+
+    public List<Tarea> obtenerTareasAsignadas(int responsableId, String tipoResponsable) {
+        return tareaRepository.findByResponsableIdAndTipoResponsable(responsableId, tipoResponsable);
+    }
 }
 

@@ -12,4 +12,5 @@ import java.util.Optional;
 @Repository
 public interface TareaRepository extends JpaRepository<Tarea, Integer> {
     List<Tarea> findByTipoResponsableAndResponsableIdIn(String tipoResponsable, List<Integer> responsableIds);
+    List<Tarea> findByResponsableIdAndTipoResponsable(int responsableId, String tipoResponsable);
 }

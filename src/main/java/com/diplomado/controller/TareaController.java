@@ -69,4 +69,14 @@ public class TareaController {
         ApiResponse<Tarea> response = new ApiResponse<>("success", "Tarea asignada exitosamente", tareaAsignada);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/asignadas")
+    public ResponseEntity<List<Tarea>> obtenerTareasAsignadas(
+            @RequestParam int responsableId,
+            @RequestParam String tipoResponsable) {
+
+        List<Tarea> tareasAsignadas = tareaService.obtenerTareasAsignadas(responsableId, tipoResponsable);
+
+        return ResponseEntity.ok(tareasAsignadas);
+    }
 }
