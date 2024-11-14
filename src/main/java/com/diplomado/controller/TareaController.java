@@ -72,8 +72,8 @@ public class TareaController {
 
     @GetMapping("/asignadas")
     public ResponseEntity<List<Tarea>> obtenerTareasAsignadas(
-            @RequestParam int responsableId,
-            @RequestParam String tipoResponsable) {
+            @RequestParam(required = false) Integer responsableId,
+            @RequestParam(required = false) String tipoResponsable) {
 
         List<Tarea> tareasAsignadas = tareaService.obtenerTareasAsignadas(responsableId, tipoResponsable);
 

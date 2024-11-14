@@ -144,7 +144,10 @@ public class TareaService {
         return tareaRepository.save(tarea);
     }
 
-    public List<Tarea> obtenerTareasAsignadas(int responsableId, String tipoResponsable) {
+    public List<Tarea> obtenerTareasAsignadas(Integer responsableId, String tipoResponsable) {
+        if (responsableId == null && tipoResponsable == null) {
+            return tareaRepository.findByResponsableIdNot(0);
+        }
         return tareaRepository.findByResponsableIdAndTipoResponsable(responsableId, tipoResponsable);
     }
 }
