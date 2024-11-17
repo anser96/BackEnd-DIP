@@ -22,4 +22,7 @@ public class Usuario {
 
     @Column(nullable = false)
     private String contrasena;
+
+    @Column(nullable = false)
+    private String rol;
 }
