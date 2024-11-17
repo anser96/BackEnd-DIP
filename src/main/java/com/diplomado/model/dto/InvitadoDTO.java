@@ -12,5 +12,6 @@ public class InvitadoDTO {
     private String nombre;
     private String dependencia;
     private String email;
+    private int numCedula;
 
 }

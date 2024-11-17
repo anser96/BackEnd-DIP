@@ -13,6 +13,7 @@ public class Miembro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idMiembro;
     private String nombre;
+    private int numCedula;
     private String cargo;
     private String email;
 

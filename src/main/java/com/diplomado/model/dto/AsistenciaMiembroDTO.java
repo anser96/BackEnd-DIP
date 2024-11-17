@@ -8,6 +8,7 @@ import lombok.Data;
 public class AsistenciaMiembroDTO {
     private int idMiembro;
     private String nombre;
+    private int numCedula;
     private String cargo;
     private String email;
     private String estadoAsistencia;

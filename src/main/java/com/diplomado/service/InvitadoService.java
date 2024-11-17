@@ -22,6 +22,7 @@ public class InvitadoService {
                 .map(invitado -> InvitadoDTO.builder()
                         .idInvitado(invitado.getIdInvitados())
                         .nombre(invitado.getNombre())
+                        .numCedula(invitado.getNumCedula())
                         .dependencia(invitado.getDependencia())
                         .email(invitado.getEmail())
                         .build())

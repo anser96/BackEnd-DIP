@@ -21,6 +21,7 @@ public class MiembroService {
                 .map(miembro -> MiembroDTO.builder()
                         .idMiembro(miembro.getIdMiembro())
                         .nombre(miembro.getNombre())
+                        .numCedula(miembro.getNumCedula())
                         .cargo(miembro.getCargo())
                         .email(miembro.getEmail())
                         .build())
